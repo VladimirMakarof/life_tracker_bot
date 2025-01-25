@@ -1,8 +1,9 @@
 const TelegramBot = require('node-telegram-bot-api');
 const Database = require('better-sqlite3');
+require('dotenv').config();
 
 // Вставьте сюда токен вашего бота, полученный от BotFather
-const token = '8068886171:AAHFDyPUNMBTbYZ_blrdhXC7IlxVs-Ur5gE'; 
+const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
 // Подключение к базе данных
