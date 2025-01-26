@@ -1,0 +1,137 @@
+/* Общие стили */
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	line-height: 1.6;
+	background-color: #f4f4f9;
+	color: #333;
+}
+
+/* Стили для header */
+header {
+	background: #007bff;
+	color: #fff;
+	padding: 1.5rem 1rem;
+	text-align: center;
+	position: relative;
+}
+
+header .hero {
+	margin: 2rem auto;
+}
+
+header .cta-button {
+	display: inline-block;
+	margin-top: 1rem;
+	padding: 0.75rem 1.5rem;
+	background: #ffc107;
+	color: #000;
+	text-decoration: none;
+	font-weight: bold;
+	border-radius: 5px;
+	transition: background 0.3s;
+}
+
+header .cta-button:hover {
+	background: #e0a800;
+}
+
+/* Стили для навигации */
+nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0.5rem 1rem;
+}
+
+nav .logo {
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+nav .burger-menu {
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	cursor: pointer;
+	display: none;
+}
+
+nav .nav-links {
+	list-style: none;
+	display: flex;
+	gap: 1rem;
+}
+
+nav .nav-links a {
+	text-decoration: none;
+	color: #fff;
+	transition: color 0.3s;
+}
+
+nav .nav-links a:hover {
+	color: #ffc107;
+}
+
+/* Бургер-меню для мобильных */
+@media (max-width: 768px) {
+	nav .burger-menu {
+			display: block;
+	}
+
+	nav .nav-links {
+			display: none;
+			flex-direction: column;
+			background: #007bff;
+			position: absolute;
+			top: 60px;
+			right: 10px;
+			width: 200px;
+			border-radius: 5px;
+	}
+
+	nav .nav-links.show {
+			display: flex;
+	}
+
+	nav .nav-links a {
+			padding: 0.5rem;
+			text-align: center;
+	}
+}
+
+/* Стили для секций */
+section {
+	max-width: 1200px;
+	margin: 2rem auto;
+	padding: 1rem;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.features-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 1rem;
+}
+
+.feature-item {
+	padding: 1rem;
+	border: 1px solid #ddd;
+	border-radius: 10px;
+	text-align: center;
+	background: #f9f9f9;
+}
+
+/* Стили для футера */
+footer {
+	text-align: center;
+	padding: 1rem;
+	background: #007bff;
+	color: #fff;
+	margin-top: 2rem;
+}
