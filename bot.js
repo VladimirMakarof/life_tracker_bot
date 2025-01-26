@@ -1,3 +1,8 @@
+const logger = {
+  info: (...args) => console.log('[INFO]', ...args),
+  error: (...args) => console.error('[ERROR]', ...args)
+};
+
 const TelegramBot = require('node-telegram-bot-api');
 const Database = require('better-sqlite3');
 require('dotenv').config();
@@ -6,10 +11,32 @@ require('dotenv').config();
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-// Подключение к базе данных
-const db = new Database('data.db');
+const dbPath = '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru/data.db';
+const db = new Database(dbPath);
+db.pragma('journal_mode = WAL');
+db.pragma('synchronous = NORMAL');
 
-// Обновляем структуру таблицы users (если поля не существуют)
+
+const userVersion = db.pragma('user_version', { simple: true });
+if (userVersion < 2) {
+  // Добавить миграции (пример для новых столбцов)
+  const hasColumn = db.prepare(`
+    SELECT COUNT(*) AS exists 
+    FROM pragma_table_info('users') 
+    WHERE name = 'subscription_status'
+  `).get().exists;
+
+  if (!hasColumn) {
+    db.prepare(`
+      ALTER TABLE users 
+      ADD COLUMN subscription_status TEXT DEFAULT 'free'
+    `).run();
+  }
+
+  db.pragma('user_version = 2');
+}
+
+// Создание таблицы users
 db.prepare(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,6 +53,124 @@ db.prepare(`
     evening_time TEXT DEFAULT '20:00'
   )
 `).run();
+
+// Создание таблицы goals
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    goal_type TEXT, -- 'long-term' или 'short-term'
+    description TEXT,
+    status TEXT DEFAULT 'active', -- 'active', 'completed', 'failed'
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+  )
+`).run();
+
+// Создание таблицы daily_logs
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS daily_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    date TEXT DEFAULT CURRENT_DATE,
+    achievements TEXT,
+    obstacles TEXT,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+  )
+`).run();
+
+// Создание таблицы notifications
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    message_type TEXT, -- 'morning' или 'evening'
+    message_content TEXT,
+    sent_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+  )
+`).run();
+
+// Создание таблицы settings
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    key TEXT NOT NULL,
+    value TEXT NOT NULL,
+    UNIQUE(user_id, key), 
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+  )
+`).run();
+
+// Создание индексов
+
+db.prepare('CREATE INDEX IF NOT EXISTS idx_users_chat_id ON users(chat_id)').run();
+db.prepare('CREATE INDEX IF NOT EXISTS idx_users_morning_time ON users(morning_time)').run();
+db.prepare('CREATE INDEX IF NOT EXISTS idx_users_evening_time ON users(evening_time)').run();
+db.prepare('CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals(user_id)').run();
+db.prepare('CREATE INDEX IF NOT EXISTS idx_logs_user_id ON daily_logs(user_id)').run();
+db.prepare('CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id)').run();
+db.prepare(`
+  CREATE INDEX IF NOT EXISTS idx_settings_user_key 
+  ON settings(user_id, key)
+`).run();
+
+
+// Логика бота
+bot.onText(/\/test/, (msg) => {
+  bot.sendMessage(msg.chat.id, 'Бот работает!');
+});
+
+// Добавьте обработку для работы с таблицей settings
+bot.onText(/\/set_setting (\w+) (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const key = match[1];
+  const value = match[2];
+
+  // Получение пользователя
+  const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+  if (!user) {
+    bot.sendMessage(chatId, 'Вы не зарегистрированы. Нажмите /start.');
+    return;
+  }
+
+  // Установка настройки
+  db.prepare(`
+    INSERT INTO settings (user_id, key, value)
+    VALUES (?, ?, ?)
+    ON CONFLICT(user_id, key) DO UPDATE SET value = excluded.value
+  `).run(user.id, key, value);
+
+  bot.sendMessage(chatId, `Настройка "${key}" обновлена на "${value}".`);
+});
+
+bot.onText(/\/get_setting (\w+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const key = match[1];
+
+  // Получение пользователя
+  const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+  if (!user) {
+    bot.sendMessage(chatId, 'Вы не зарегистрированы. Нажмите /start.');
+    return;
+  }
+
+  // Получение настройки
+  const setting = db.prepare('SELECT value FROM settings WHERE user_id = ? AND key = ?').get(user.id, key);
+  if (setting) {
+    bot.sendMessage(chatId, `Значение настройки "${key}": "${setting.value}".`);
+  } else {
+    bot.sendMessage(chatId, `Настройка "${key}" не найдена.`);
+  }
+});
+
+function isValidTime(time) {
+  if (!/^\d{2}:\d{2}$/.test(time)) return false; // Сначала базовая проверка формата
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+}
+
 
 // Сообщения на разных языках
 const messages = {
@@ -45,6 +190,10 @@ const messages = {
     setEvening: 'Введите время вечернего сообщения (например, 20:00):',
     successSetMorning: 'Время утреннего сообщения успешно обновлено!',
     successSetEvening: 'Время вечернего сообщения успешно обновлено!',
+    invalidTime: '⏳ Некорректный формат времени. Используйте ЧЧ:ММ (например, 08:00)',
+    error: '⚠️ Произошла ошибка, попробуйте позже',
+    errorUserNotFound: '❌ Пользователь не найден. Нажмите /start',
+    resetSuccess: '✅ Все данные успешно сброшены!'
   },
   en: {
     text: `
@@ -62,6 +211,10 @@ You’ll see how every small step brings you closer to your big dream!
     setEvening: 'Enter the time for the evening message (e.g., 20:00):',
     successSetMorning: 'Morning message time successfully updated!',
     successSetEvening: 'Evening message time successfully updated!',
+    invalidTime: '⏳ Invalid time format. Use HH:MM (e.g., 08:00)',
+    error: '⚠️ An error occurred, please try again',
+    errorUserNotFound: '❌ User not found. Press /start',
+    resetSuccess: '✅ All data has been successfully reset!'
   }
 };
 const userStates = {}; // Хранение состояний пользователей
@@ -152,7 +305,12 @@ bot.on('message', (msg) => {
         const birthdate = new Date(user.birthdate.split('.').reverse().join('-'));
         const targetAge = user.target_age;
         const today = new Date();
-        const yearsLeft = targetAge - (today.getFullYear() - birthdate.getFullYear());
+        const yearsPassed = today.getFullYear() - birthdate.getFullYear();
+        const monthDiff = today.getMonth() - birthdate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+          yearsPassed--;
+        }
+        const yearsLeft = targetAge - yearsPassed;
 
         bot.sendMessage(chatId, `Спасибо! Ты указал, что хотел бы прожить ${targetAge} лет. Осталось примерно ${yearsLeft} лет.`);
       } else {
@@ -167,52 +325,110 @@ bot.onText(/\/test/, (msg) => {
 });
 
 // Обработка команды /set_morning
+
 bot.onText(/\/set_morning/, (msg) => {
   const chatId = msg.chat.id;
-  const userLanguage = msg.from.language_code.startsWith('ru') ? 'ru' : 'en';
-
-  bot.sendMessage(chatId, messages[userLanguage].setMorning);
-  bot.once('message', (response) => {
-    const time = response.text.trim();
-    if (/^\d{2}:\d{2}$/.test(time)) {
-      db.prepare('UPDATE users SET morning_time = ? WHERE chat_id = ?').run(time, chatId);
-      bot.sendMessage(chatId, messages[userLanguage].successSetMorning);
-    } else {
-      bot.sendMessage(chatId, 'Invalid time format. Please try again.');
+  
+  try {
+    const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+    if (!user) {
+      bot.sendMessage(chatId, messages.ru.errorUserNotFound);
+      return;
     }
-  });
+
+    const userLanguage = user.language || 'en';
+    bot.sendMessage(chatId, messages[userLanguage].setMorning);
+
+    bot.once('message', (response) => {
+      try {
+        const time = response.text.trim();
+        
+        if (!isValidTime(time)) {
+          bot.sendMessage(chatId, messages[userLanguage].invalidTime);
+          return;
+        }
+
+        db.prepare('UPDATE users SET morning_time = ? WHERE chat_id = ?')
+          .run(time, chatId);
+          
+        bot.sendMessage(chatId, messages[userLanguage].successSetMorning);
+      } catch (e) {
+        logger.error('Ошибка установки утреннего времени:', e);
+        bot.sendMessage(chatId, messages[userLanguage].error);
+      }
+    });
+  } catch (e) {
+    logger.error('Ошибка в /set_morning:', e);
+    bot.sendMessage(chatId, messages.en.error); // Fallback на английский
+  }
 });
 
 // Обработка команды /set_evening
+
 bot.onText(/\/set_evening/, (msg) => {
   const chatId = msg.chat.id;
-  const userLanguage = msg.from.language_code.startsWith('ru') ? 'ru' : 'en';
-
-  bot.sendMessage(chatId, messages[userLanguage].setEvening);
-  bot.once('message', (response) => {
-    const time = response.text.trim();
-    if (/^\d{2}:\d{2}$/.test(time)) {
-      db.prepare('UPDATE users SET evening_time = ? WHERE chat_id = ?').run(time, chatId);
-      bot.sendMessage(chatId, messages[userLanguage].successSetEvening);
-    } else {
-      bot.sendMessage(chatId, 'Invalid time format. Please try again.');
+  
+  try {
+    const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+    if (!user) {
+      bot.sendMessage(chatId, messages.ru.errorUserNotFound);
+      return;
     }
-  });
+
+    const userLanguage = user.language || 'en';
+    bot.sendMessage(chatId, messages[userLanguage].setEvening);
+
+    bot.once('message', (response) => {
+      try {
+        const time = response.text.trim();
+        
+        if (!isValidTime(time)) {
+          bot.sendMessage(chatId, messages[userLanguage].invalidTime);
+          return;
+        }
+
+        db.prepare('UPDATE users SET evening_time = ? WHERE chat_id = ?')
+          .run(time, chatId);
+          
+        bot.sendMessage(chatId, messages[userLanguage].successSetEvening);
+      } catch (e) {
+        logger.error('Ошибка установки вечернего времени:', e);
+        bot.sendMessage(chatId, messages[userLanguage].error);
+      }
+    });
+  } catch (e) {
+    logger.error('Ошибка в /set_evening:', e);
+    bot.sendMessage(chatId, messages.en.error);
+  }
 });
 
-// Обработка команды /reset
-// Обработка команды /reset
 bot.onText(/\/reset/, (msg) => {
   const chatId = msg.chat.id;
+  
+  const deleteUser = db.transaction(() => {
+    const userId = db.prepare('SELECT id FROM users WHERE chat_id = ?')
+      .pluck()
+      .get(chatId);
 
-  // Удаляем пользователя из базы данных
-  db.prepare('DELETE FROM users WHERE chat_id = ?').run(chatId);
+    if (userId) {
+      db.prepare('DELETE FROM settings WHERE user_id = ?').run(userId);
+      db.prepare('DELETE FROM goals WHERE user_id = ?').run(userId);
+      db.prepare('DELETE FROM daily_logs WHERE user_id = ?').run(userId);
+      db.prepare('DELETE FROM notifications WHERE user_id = ?').run(userId);
+      db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    }
+  });
 
-  // Очищаем состояние пользователя
-  delete userStates[chatId];
-
-  // Отправляем сообщение о сбросе
-  bot.sendMessage(chatId, 'Ваши данные сброшены. Нажмите /start, чтобы начать заново.');
+  try {
+    deleteUser();
+    delete userStates[chatId];
+    const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+    const lang = user?.language || 'en';
+    bot.sendMessage(chatId, messages[lang].resetSuccess);
+  } catch (e) {
+    logger.error('Ошибка при сбросе:', e);
+    bot.sendMessage(chatId, messages.en.error);
+  }
 });
 
 // Обработка нажатия кнопки
@@ -239,7 +455,9 @@ schedule.scheduleJob('* * * * *', () => {
   // Утренние уведомления
   const morningUsers = db.prepare('SELECT * FROM users WHERE morning_time = ?').all(currentTime);
   morningUsers.forEach(user => {
+    if (user && user.chat_id) {
     bot.sendMessage(user.chat_id, `Доброе утро, ${user.name}! Напоминаю, что у тебя осталось ${calculateTimeLeft(user)} до цели. Удачного дня! 🌞`);
+  }
   });
 
   // Вечерние уведомления
@@ -254,7 +472,15 @@ const calculateTimeLeft = (user) => {
   const birthdate = new Date(user.birthdate.split('.').reverse().join('-'));
   const targetAge = user.target_age;
   const today = new Date();
-  const yearsLeft = targetAge - (today.getFullYear() - birthdate.getFullYear());
-  return `${yearsLeft} лет`;
+  
+  let yearsPassed = today.getFullYear() - birthdate.getFullYear();
+  const monthDiff = today.getMonth() - birthdate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+    yearsPassed--;
+  }
+  
+  const yearsLeft = targetAge - yearsPassed;
+  return yearsLeft > 0 ? `${yearsLeft} лет` : 'Цель достигнута!';
 };
 
