@@ -294,29 +294,86 @@ bot.on('message', (msg) => {
       }
       break;
 
-    case 'ask_evening_time':
-      // Проверяем формат времени
-      if (/^\d{2}:\d{2}$/.test(text)) {
-        db.prepare('UPDATE users SET evening_time = ? WHERE chat_id = ?').run(text, chatId);
-        delete userStates[chatId]; // Завершаем процесс знакомства
-
-        // Рассчитываем оставшееся время
-        const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
-        const birthdate = new Date(user.birthdate.split('.').reverse().join('-'));
-        const targetAge = user.target_age;
-        const today = new Date();
-        const yearsPassed = today.getFullYear() - birthdate.getFullYear();
-        const monthDiff = today.getMonth() - birthdate.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
-          yearsPassed--;
+      case 'ask_evening_time':
+        if (/^\d{2}:\d{2}$/.test(text)) {
+          try {
+            // Логируем сам ввод
+            logger.info(`[ask_evening_time] User ${chatId} sets evening_time = "${text}"`);
+      
+            // Сохраняем время в БД
+            db.prepare('UPDATE users SET evening_time = ? WHERE chat_id = ?').run(text, chatId);
+          } catch (e) {
+            logger.error('[ask_evening_time] SQL error on UPDATE evening_time:', e.message);
+            bot.sendMessage(chatId, 'Произошла ошибка при сохранении вечернего времени, попробуйте ещё раз позже.');
+            return; // Прекращаем дальнейшее выполнение
+          }
+      
+          // Убираем состояние (завершаем цепочку опроса)
+          delete userStates[chatId];
+      
+          let user;
+          try {
+            // Читаем обновлённые данные пользователя
+            user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+          } catch (e) {
+            logger.error('[ask_evening_time] SQL error on SELECT user:', e.message);
+            bot.sendMessage(chatId, 'Произошла ошибка при чтении данных пользователя, попробуйте ещё раз позже.');
+            return;
+          }
+      
+          // Если по каким-то причинам запись в БД не найдена
+          if (!user) {
+            bot.sendMessage(chatId, 'Не удалось найти вашу запись в системе. Попробуйте /start или /reset.');
+            return;
+          }
+      
+          // Проверяем, что у пользователя действительно есть дата рождения
+          if (!user.birthdate) {
+            bot.sendMessage(chatId, 'Данные о дате рождения не были сохранены. Попробуйте /reset и ввести заново.');
+            return;
+          }
+      
+          // Попытаемся преобразовать birthdate в валидную дату
+          const birthdateParts = user.birthdate.split('.');
+          if (birthdateParts.length !== 3) {
+            bot.sendMessage(chatId, 'Формат даты рождения некорректный. Попробуйте /reset и ввести заново.');
+            return;
+          }
+      
+          // Форматируем под YYYY-MM-DD
+          const birthdate = new Date(birthdateParts.reverse().join('-'));
+          const targetAge = user.target_age;
+      
+          // Проверяем, что target_age - число
+          if (!targetAge || isNaN(targetAge)) {
+            bot.sendMessage(chatId, 'Целевой возраст не найден или некорректен. Попробуйте /reset.');
+            return;
+          }
+      
+          // Считаем, сколько осталось лет
+          const today = new Date();
+          let yearsPassed = today.getFullYear() - birthdate.getFullYear();
+          const monthDiff = today.getMonth() - birthdate.getMonth();
+      
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+            yearsPassed--;
+          }
+      
+          const yearsLeft = targetAge - yearsPassed;
+      
+          // Отправляем итоговое сообщение
+          bot.sendMessage(
+            chatId,
+            `Спасибо! Ты указал, что хотел бы прожить ${targetAge} лет. Осталось примерно ${yearsLeft} лет.`
+          );
+      
+        } else {
+          // Формат времени не подходит
+          bot.sendMessage(chatId, 'Неверный формат времени. Попробуй ещё раз (например, 20:00):');
         }
-        const yearsLeft = targetAge - yearsPassed;
-
-        bot.sendMessage(chatId, `Спасибо! Ты указал, что хотел бы прожить ${targetAge} лет. Осталось примерно ${yearsLeft} лет.`);
-      } else {
-        bot.sendMessage(chatId, 'Неверный формат времени. Попробуй еще раз (например, 20:00):');
-      }
-      break;
+      
+        break;
+      
   }
 });
 
@@ -456,8 +513,8 @@ schedule.scheduleJob('* * * * *', () => {
   const morningUsers = db.prepare('SELECT * FROM users WHERE morning_time = ?').all(currentTime);
   morningUsers.forEach(user => {
     if (user && user.chat_id) {
-    bot.sendMessage(user.chat_id, `Доброе утро, ${user.name}! Напоминаю, что у тебя осталось ${calculateTimeLeft(user)} до цели. Удачного дня! 🌞`);
-  }
+      bot.sendMessage(user.chat_id, `Доброе утро, ${user.name || 'друг'}! Напоминаю, что у тебя осталось ${calculateTimeLeft(user)} до цели. Удачного дня! 🌞`);
+    }
   });
 
   // Вечерние уведомления
