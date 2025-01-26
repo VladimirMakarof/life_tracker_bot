@@ -9,7 +9,7 @@ const SECRET = process.env.SECRET_TOKEN;
 
 app.use(express.json());
 
-// Проверка подписи для безопасности
+// Проверка подписи для безопасности 
 function verifySignature(req) {
   const signature = req.headers['x-hub-signature-256'];
   const body = JSON.stringify(req.body);
@@ -27,7 +27,7 @@ app.post('/github-webhook', (req, res) => {
   console.log('Получен Webhook:', req.body);
 
   // Выполняем git pull для обновления  кода  
-  exec('git pull origin main', { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' }, (err, stdout, stderr) => {
+  exec('git fetch origin && git reset --hard origin/main', { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' }, (err, stdout, stderr) => {
     if (err) {
       console.error(`Ошибка: ${stderr}`);
       return res.status(500).send('Ошибка при обновлении');
