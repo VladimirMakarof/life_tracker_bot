@@ -3,68 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Tracker Bot</title>
+    <title>Life Tracker Bot - Управляй своей жизнью!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
-		<link rel="icon" href="img/favicon.svg" type="../image/svg+xml">
-
-
+    <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-    <header>
+    <header class="gradient-bg">
         <nav>
-            <div class="logo">Life Tracker Bot</div>
+            <div class="logo">
+                <img src="../img/bot-icon.png" alt="Логотип бота" class="logo-img">
+                LifeTracker
+            </div>
             <button class="burger-menu" aria-label="Открыть меню">&#9776;</button>
             <ul class="nav-links">
                 <li><a href="#about">О боте</a></li>
-                <li><a href="#features">Функции</a></li>
-                <li><a href="#plans">Планы</a></li>
-                <li><a href="#contacts">Контакты</a></li>
+                <li><a href="#features">Возможности</a></li>
+                <li><a href="#testimonials">Отзывы</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="https://t.me/life_tracker_app_bot" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram"></i> Начать
+                </a></li>
             </ul>
         </nav>
         <div class="hero">
-            <h1>Life Tracker Bot</h1>
-            <p>Ваш помощник для борьбы с выгоранием, структурирования жизни и постановки целей!</p>
-            <a href="#about" class="cta-button">Узнать больше</a>
+            <div class="hero-content">
+                <h1>Возьмите жизнь под контроль с умным помощником</h1>
+                <p class="hero-subtitle">Победите прокрастинацию, избегайте выгорания и достигайте целей системно</p>
+                <a href="https://t.me/life_tracker_app_bot" class="cta-button pulse" target="_blank">
+                    <i class="fab fa-telegram"></i> Начать бесплатно
+                </a>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number">15K+</div>
+                        <div class="stat-text">Активных пользователей</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">4.9</div>
+                        <div class="stat-text">Рейтинг в Telegram</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="../img/bot-preview.png" alt="Интерфейс бота" class="bot-preview" loading="lazy">
+            </div>
         </div>
     </header>
-    <main>
-        <section id="about">
-            <h2>Почему Life Tracker Bot?</h2>
-            <p>Life Tracker Bot — это ваш персональный инструмент для саморазвития и гармоничной жизни. Он помогает анализировать вашу продуктивность, сохранять баланс и добиваться целей без стресса.</p>
-        </section>
 
-        <section id="features">
-            <h2>Основные функции</h2>
-            <div class="features-grid">
-                <div class="feature-item">
-                    <h3>Борьба с выгоранием</h3>
-                    <p>Техники релаксации и отслеживание эмоционального состояния.</p>
-                </div>
-                <div class="feature-item">
-                    <h3>Планирование</h3>
-                    <p>Удобные инструменты для расстановки приоритетов и достижения целей.</p>
-                </div>
-                <div class="feature-item">
-                    <h3>Рефлексия</h3>
-                    <p>Ежедневные отчёты и анализ выполненных задач.</p>
+    <main>
+        <section id="about" class="section-wave">
+            <div class="section-inner">
+                <h2>Цифровой наставник для вашего развития</h2>
+                <div class="about-grid">
+                    <div class="about-card">
+                        <i class="fas fa-brain"></i>
+                        <h3>Анализ состояния</h3>
+                        <p>Ежедневный мониторинг вашего эмоционального состояния и уровня стресса</p>
+                    </div>
+                    <div class="about-card">
+                        <i class="fas fa-tasks"></i>
+                        <h3>Умное планирование</h3>
+                        <p>Персонализированные рекомендации по распределению задач</p>
+                    </div>
+                    <div class="about-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Прогресс</h3>
+                        <p>Визуализация достижений и отслеживание динамики</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section id="plans">
-            <h2>Планы развития</h2>
-            <p>Мы постоянно обновляем функционал бота, добавляя новые возможности. Ожидайте интеграцию с популярными сервисами и персонализированные рекомендации.</p>
+        <section id="features">
+            <div class="section-inner">
+                <h2>Ваш личный инструмент развития</h2>
+                <div class="features-accordion">
+                    <div class="accordion-item active">
+                        <div class="accordion-header">
+                            <i class="fas fa-heartbeat"></i>
+                            <h3>Анти-выгорание</h3>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Система раннего предупреждения и персональные упражнения для восстановления</p>
+                        </div>
+                    </div>
+                    <!-- Добавьте больше элементов аккордеона -->
+                </div>
+            </div>
         </section>
 
-        <section id="contacts">
-            <h2>Свяжитесь с нами</h2>
-            <p>У вас есть вопросы или предложения? Напишите нам на <a href="mailto:support@lifetrackerbot.com">support@lifetrackerbot.com</a></p>
+        <section id="testimonials" class="gradient-bg">
+            <div class="section-inner">
+                <h2>Истории успеха</h2>
+                <div class="testimonials-slider">
+                    <div class="testimonial-card">
+                        <img src="../img/user1.jpg" alt="Пользователь">
+                        <p>"С помощью бота смог восстановиться после тяжелого выгорания за 2 месяца!"</p>
+                        <div class="user-name">Андрей, 28 лет</div>
+                    </div>
+                    <!-- Добавьте больше отзывов -->
+                </div>
+            </div>
+        </section>
+
+        <section id="faq">
+            <div class="section-inner">
+                <h2>Частые вопросы</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            Как начать использовать бота?
+                        </div>
+                        <div class="faq-answer">Просто нажмите кнопку "Начать" в шапке сайта!</div>
+                    </div>
+                    <!-- Добавьте больше вопросов -->
+                </div>
+            </div>
         </section>
     </main>
+
+    <div class="floating-telegram">
+        <a href="https://t.me/life_tracker_app_bot" target="_blank" class="float-btn">
+            <i class="fab fa-telegram"></i>
+        </a>
+    </div>
+
     <footer>
-        <p>&copy; 2025 Life Tracker Bot. Все права защищены.</p>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>LifeTracker</h4>
+                <p>Ваш проводник в мире саморазвития</p>
+            </div>
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <a href="mailto:support@lifetracker.com">support@lifetracker.com</a>
+            </div>
+            <div class="footer-section">
+                <h4>Соцсети</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-vk"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2024 LifeTracker. Все права защищены
+        </div>
     </footer>
+
     <script src="../js/script.js"></script>
 </body>
 </html>
-
