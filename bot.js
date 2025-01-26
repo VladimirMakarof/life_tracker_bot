@@ -21,10 +21,10 @@ const userVersion = db.pragma('user_version', { simple: true });
 if (userVersion < 2) {
   // Добавить миграции (пример для новых столбцов)
   const hasColumn = db.prepare(`
-    SELECT COUNT(*) AS exists 
+    SELECT COUNT(*) AS column_exists 
     FROM pragma_table_info('users') 
     WHERE name = 'subscription_status'
-  `).get().exists;
+  `).get().column_exists;
 
   if (!hasColumn) {
     db.prepare(`
