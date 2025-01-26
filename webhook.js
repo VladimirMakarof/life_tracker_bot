@@ -27,7 +27,7 @@ app.post('/github-webhook', (req, res) => {
   console.log('Получен Webhook:', req.body);
 
   // Выполняем git pull для обновления кода
-  exec('git pull', { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' }, (err, stdout, stderr) => {
+  exec('git pull origin main', { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' }, (err, stdout, stderr) => {
     if (err) {
       console.error(`Ошибка: ${stderr}`);
       return res.status(500).send('Ошибка при обновлении');
