@@ -1,0 +1,25 @@
+# Явно указываем текстовые файлы
+*.php text
+*.html text
+*.css text
+*.js text
+*.json text
+*.md text
+*.txt text
+*.xml text
+*.yml text
+
+# Исключаем бинарные/медиа файлы
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webmanifest binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.mp3 binary
+*.zip binary
+
+# Для всех остальных текстовых файлов используем автоопределение
+* text=auto
