@@ -538,6 +538,11 @@ eveningUsers.forEach(user => {
 
 // Функция для расчета оставшегося времени
 const calculateTimeLeft = (user) => {
+
+  if (!user.birthdate || !user.target_age) {
+    return '–'; // или какое-то другое текстовое значение, если дата не заполнена
+  }
+
   const birthdate = new Date(user.birthdate.split('.').reverse().join('-'));
   const targetAge = user.target_age;
   const today = new Date();
