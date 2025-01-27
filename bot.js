@@ -511,17 +511,29 @@ schedule.scheduleJob('* * * * *', () => {
 
   // Утренние уведомления
   const morningUsers = db.prepare('SELECT * FROM users WHERE morning_time = ?').all(currentTime);
-  morningUsers.forEach(user => {
-    if (user && user.chat_id) {
-      bot.sendMessage(user.chat_id, `Доброе утро, ${user.name || 'друг'}! Напоминаю, что у тебя осталось ${calculateTimeLeft(user)} до цели. Удачного дня! 🌞`);
-    }
-  });
+morningUsers.forEach(user => {
+  // Проверяем, есть ли у пользователя дата рождения и целевой возраст
+  if (!user.birthdate || !user.target_age) {
+    // Пропускаем, если поля ещё не заполнены
+    return;
+  }
+  bot.sendMessage(
+    user.chat_id, 
+    `Доброе утро, ${user.name || 'друг'}! Напоминаю, что у тебя осталось ${calculateTimeLeft(user)} до цели. Удачного дня! 🌞`
+  );
+});
 
   // Вечерние уведомления
   const eveningUsers = db.prepare('SELECT * FROM users WHERE evening_time = ?').all(currentTime);
-  eveningUsers.forEach(user => {
-    bot.sendMessage(user.chat_id, `Добрый вечер, ${user.name}! Сегодня ты стал на один день ближе к своей цели. Спокойной ночи! 🌙`);
-  });
+eveningUsers.forEach(user => {
+  if (!user.birthdate || !user.target_age) {
+    return;
+  }
+  bot.sendMessage(
+    user.chat_id, 
+    `Добрый вечер, ${user.name}! Сегодня ты стал на один день ближе к своей цели. Спокойной ночи! 🌙`
+  );
+});
 });
 
 // Функция для расчета оставшегося времени
