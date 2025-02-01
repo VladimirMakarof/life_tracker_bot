@@ -9,7 +9,10 @@ require('dotenv').config();
 
 // Вставьте сюда токен вашего бота, полученный от BotFather.321123
 const token = process.env.BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+// const bot = new TelegramBot(token, { polling: true });
+
+const bot = new TelegramBot(token);
+bot.setWebHook(`${url}/bot${token}`);
 
 const dbPath = process.env.DB_PATH;
 const db = new Database(dbPath);

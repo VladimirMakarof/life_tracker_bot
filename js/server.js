@@ -6,10 +6,28 @@ const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+const url = process.env.URL || 'https://lifetrackerbot.ru/';
 const dbPath = process.env.DB_PATH || 'data.db'; 
 const db = new Database(dbPath);
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+// const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.BOT_TOKEN);
+
+bot.setWebHook(`${url}/bot${process.env.BOT_TOKEN}`);
+
+// const express = require('express');
+
+
+app.use(express.json());
+
+app.post(`/bot${process.env.BOT_TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+app.listen(port, () => {
+  console.log(`Express server is listening on ${port}`);
+});
 
 app.use(express.json());
 app.use(cookieParser());
