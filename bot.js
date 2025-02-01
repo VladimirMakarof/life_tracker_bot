@@ -236,25 +236,21 @@ const userStates = {}; // Хранение состояний пользоват
 // Обработка команды /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
+  // Если language_code отсутствует – задаём язык по умолчанию (en)
+  const userLanguage = (msg.from.language_code && msg.from.language_code.startsWith('ru')) ? 'ru' : 'en';
   const username = msg.from.username || 'unknown';
-  const userLanguage = msg.from.language_code.startsWith('ru') ? 'ru' : 'en';
 
-  // Проверяем, существует ли пользователь
   let user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
 
   if (!user) {
-    // Добавляем нового пользователя
     db.prepare(`
       INSERT INTO users (chat_id, username, language)
       VALUES (?, ?, ?)
     `).run(chatId, username, userLanguage);
     user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
-
-    // Начинаем знакомство
     userStates[chatId] = { step: 'ask_name' };
     bot.sendMessage(chatId, 'Привет! Как тебя зовут?');
   } else {
-    // Пользователь уже зарегистрирован
     bot.sendMessage(chatId, 'С возвращением!');
   }
 });
@@ -391,9 +387,6 @@ bot.on('message', (msg) => {
   }
 });
 
-bot.onText(/\/test/, (msg) => {
-  bot.sendMessage(msg.chat.id, 'Бот работает!');
-});
 
 // Обработка команды /set_morning
 
