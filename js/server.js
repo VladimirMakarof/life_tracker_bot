@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Статические файлы (например, для dashboard.html)
-app.use(express.static('public'));
+app.use(express.static('pages'));
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key';
 
