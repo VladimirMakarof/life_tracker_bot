@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Life Tracker Bot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <header class="gradient-bg">
+        <nav>
+            <div class="logo">
+                <img src="../img/bot-icon.png" alt="Логотип бота" class="logo-img">
+                LifeTracker
+            </div>
+            <button class="burger-menu" aria-label="Открыть меню">&#9776;</button>
+            <ul class="nav-links">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="#profile">Профиль</a></li>
+                <li><a href="#goals">Цели</a></li>
+                <li><a href="#diary">Дневник</a></li>
+                <li><button id="logout" class="logout-btn">Выйти</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="profile">
+            <div class="section-inner">
+                <h2>👤 Ваш профиль</h2>
+                <p id="userInfo">Загрузка данных...</p>
+            </div>
+        </section>
+
+        <section id="goals">
+            <div class="section-inner">
+                <h2>🎯 Ваши цели</h2>
+                <ul id="goalList">
+                    <li>Загрузка данных...</li>
+                </ul>
+                <button id="addGoalBtn">Добавить цель</button>
+            </div>
+        </section>
+
+        <section id="diary">
+            <div class="section-inner">
+                <h2>📖 Дневник</h2>
+                <textarea id="diaryEntry" placeholder="Введите заметку..."></textarea>
+                <button id="saveDiary">Сохранить</button>
+                <ul id="diaryList"></ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>© 2024 LifeTracker. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

@@ -121,6 +121,42 @@
                 </div>
             </div>
         </section>
+
+        section id="login">
+            <div class="section-inner">
+                <h2>Личный кабинет</h2>
+                <p>Используйте Telegram для безопасной авторизации. После входа вы сможете управлять своими целями и дневником.</p>
+
+                <!-- 📌 Форма авторизации -->
+                <div class="login-container">
+                    <form id="loginForm">
+                        <label for="chatId">Введите ваш Chat ID:</label>
+                        <input type="text" id="chatId" required placeholder="Например, 123456789">
+                        <button type="submit">Получить код</button>
+                    </form>
+
+                    <!-- Блок ввода кода -->
+                    <form id="codeForm" class="hidden">
+                        <label for="authCode">Введите код из Telegram:</label>
+                        <input type="text" id="authCode" required placeholder="6-значный код">
+                        <button type="submit">Войти</button>
+                    </form>
+
+                    <p id="loginMessage"></p>
+                </div>
+
+                <!-- ℹ️ Инструкция -->
+                <div class="instruction">
+                    <h3>Как узнать ваш Chat ID?</h3>
+                    <ol>
+                        <li>Откройте Telegram.</li>
+                        <li>Напишите команду <code>/start</code> боту <a href="https://t.me/life_tracker_app_bot" target="_blank">@life_tracker_app_bot</a>.</li>
+                        <li>Бот отправит вам ваш <strong>Chat ID</strong>.</li>
+                        <li>Используйте его для входа на сайт.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
     </main>
 
     <div class="floating-telegram">
@@ -153,5 +189,6 @@
     </footer>
 
     <script src="../js/script.js"></script>
+    <script src="../js/server.js"></script>
 </body>
 </html>

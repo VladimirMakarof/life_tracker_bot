@@ -47,6 +47,8 @@ db.prepare(`
     target_age INTEGER,
     language TEXT DEFAULT 'en',
     subscription_status TEXT DEFAULT 'free',
+    subscription_plan TEXT DEFAULT 'free', -- Добавляем план подписки
+    consent_given INTEGER DEFAULT 0, -- Добавляем согласие пользователя
     is_exempt INTEGER DEFAULT 0,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     morning_time TEXT DEFAULT '08:00',
@@ -105,9 +107,20 @@ db.prepare(`
 
 // Создание индексов
 
-db.prepare('CREATE INDEX IF NOT EXISTS idx_users_chat_id ON users(chat_id)').run();
+// Индекс для поиска пользователей по chat_id
+db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_chat_id ON users(chat_id)').run();
+
+// Индексы для быстрого доступа к утреннему и вечернему времени
 db.prepare('CREATE INDEX IF NOT EXISTS idx_users_morning_time ON users(morning_time)').run();
 db.prepare('CREATE INDEX IF NOT EXISTS idx_users_evening_time ON users(evening_time)').run();
+
+// Индекс для быстрого поиска пользователей по подписке
+db.prepare('CREATE INDEX IF NOT EXISTS idx_users_subscription_plan ON users(subscription_plan)').run();
+
+// Индекс для поиска пользователей по согласию
+db.prepare('CREATE INDEX IF NOT EXISTS idx_users_consent_given ON users(consent_given)').run();
+
+// Для других таблиц, если они уже существуют
 db.prepare('CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals(user_id)').run();
 db.prepare('CREATE INDEX IF NOT EXISTS idx_logs_user_id ON daily_logs(user_id)').run();
 db.prepare('CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id)').run();
@@ -115,6 +128,7 @@ db.prepare(`
   CREATE INDEX IF NOT EXISTS idx_settings_user_key 
   ON settings(user_id, key)
 `).run();
+
 
 
 // Логика бота
@@ -507,37 +521,48 @@ const schedule = require('node-schedule');
 // Запускаем задачу каждую минуту
 schedule.scheduleJob('* * * * *', () => {
   const now = new Date();
-  const currentTime = now.toTimeString().slice(0, 5); // Формат HH:MM
+  const currentTime = now.toTimeString().slice(0, 5); // HH:MM
 
   // Утренние уведомления
   const morningUsers = db.prepare('SELECT * FROM users WHERE morning_time = ?').all(currentTime);
-morningUsers.forEach(user => {
-  // Проверяем, есть ли у пользователя дата рождения и целевой возраст
-  if (!user.birthdate || !user.target_age) {
-    // Пропускаем, если поля ещё не заполнены
-    return;
-  }
-  bot.sendMessage(
-    user.chat_id, 
-    `Доброе утро, ${user.name || 'друг'}! Напоминаю, что у тебя осталось ${calculateTimeLeft(user)} до цели. Удачного дня! 🌞`
-  );
-});
+  morningUsers.forEach(user => {
+    // Добавим лог:
+    console.log('[DEBUG] morningUsers item:', user);
+
+    if (!user.birthdate || !user.target_age) {
+      console.log('[DEBUG] Skip user because birthdate or target_age is empty:', user.chat_id);
+      return;
+    }
+    
+    // Если есть birthdate — вызываем calculateTimeLeft
+    bot.sendMessage(
+      user.chat_id,
+      `Доброе утро, ${user.name || 'друг'}! Осталось ${calculateTimeLeft(user)} лет до цели.`
+    );
+  });
 
   // Вечерние уведомления
   const eveningUsers = db.prepare('SELECT * FROM users WHERE evening_time = ?').all(currentTime);
-eveningUsers.forEach(user => {
-  if (!user.birthdate || !user.target_age) {
-    return;
-  }
-  bot.sendMessage(
-    user.chat_id, 
-    `Добрый вечер, ${user.name}! Сегодня ты стал на один день ближе к своей цели. Спокойной ночи! 🌙`
-  );
+  eveningUsers.forEach(user => {
+    console.log('[DEBUG] eveningUsers item:', user);
+
+    if (!user.birthdate || !user.target_age) {
+      console.log('[DEBUG] Skip user because birthdate or target_age is empty:', user.chat_id);
+      return;
+    }
+
+    bot.sendMessage(
+      user.chat_id,
+      `Добрый вечер, ${user.name}! Сегодня ты стал на один день ближе к своей цели. Спокойной ночи!`
+    );
+  });
 });
-});
+
 
 // Функция для расчета оставшегося времени
 const calculateTimeLeft = (user) => {
+
+  console.log('[DEBUG] calculateTimeLeft called with user:', user);
 
   if (!user.birthdate || !user.target_age) {
     return '–'; // или какое-то другое текстовое значение, если дата не заполнена

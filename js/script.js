@@ -75,3 +75,52 @@ document.addEventListener('DOMContentLoaded', () => {
 			observer.observe(img);
 	});
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+	const loginForm = document.getElementById('loginForm');
+	const codeForm = document.getElementById('codeForm');
+	const loginMessage = document.getElementById('loginMessage');
+
+	loginForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const chatId = document.getElementById('chatId').value;
+
+			// Отправляем запрос на сервер
+			const response = await fetch('/request-login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ chatId })
+			});
+
+			const data = await response.json();
+			if (data.success) {
+					loginMessage.textContent = 'Код отправлен в Telegram!';
+					loginForm.classList.add('hidden');
+					codeForm.classList.remove('hidden');
+			} else {
+					loginMessage.textContent = data.error;
+			}
+	});
+
+	codeForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const chatId = document.getElementById('chatId').value;
+			const authCode = document.getElementById('authCode').value;
+
+			// Отправляем код на сервер
+			const verifyResponse = await fetch('/verify-login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ chatId, code: authCode })
+			});
+
+			const verifyData = await verifyResponse.json();
+			if (verifyData.success) {
+					loginMessage.textContent = 'Авторизация успешна!';
+					window.location.href = '/dashboard'; // Переход в ЛК
+			} else {
+					loginMessage.textContent = 'Неверный код!';
+			}
+	});
+});
