@@ -163,5 +163,49 @@ app.post('/logout', (req, res) => {
     res.json({ success: true, message: '✅ Вы вышли из системы' });
 });
 
+
+// ✅ Добавляем недостающие маршруты в server.js
+
+app.put('/api/user', authenticateToken, (req, res) => {
+    const { name, birthdate, target_age, language, morning_time, evening_time } = req.body;
+    
+    const result = db.prepare(`
+        UPDATE users 
+        SET name = ?, birthdate = ?, target_age = ?, language = ?, morning_time = ?, evening_time = ?
+        WHERE chat_id = ?
+    `).run(name, birthdate, target_age, language, morning_time, evening_time, req.user.chatId);
+    
+    if (result.changes > 0) {
+        res.json({ success: true, message: 'Профиль обновлён' });
+    } else {
+        res.status(400).json({ success: false, error: 'Ошибка обновления профиля' });
+    }
+});
+
+app.delete('/api/user', authenticateToken, (req, res) => {
+    const chatId = req.user.chatId;
+    const userId = db.prepare('SELECT id FROM users WHERE chat_id = ?').pluck().get(chatId);
+
+    if (!userId) {
+        return res.status(404).json({ success: false, error: 'Пользователь не найден' });
+    }
+    
+    const deleteUser = db.transaction(() => {
+        db.prepare('DELETE FROM settings WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM goals WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM daily_logs WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM notifications WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    });
+    
+    try {
+        deleteUser();
+        res.json({ success: true, message: 'Пользователь удалён' });
+    } catch (e) {
+        res.status(500).json({ success: false, error: 'Ошибка при удалении пользователя' });
+    }
+});
+
+
 // Запускаем сервер
 app.listen(port, () => console.log(`🚀 Сервер запущен на порту ${port}`));
