@@ -11,7 +11,7 @@ require('dotenv').config();
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-const dbPath = '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru/data.db';
+const dbPath = process.env.DB_PATH;
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');

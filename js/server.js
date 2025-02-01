@@ -7,7 +7,8 @@ require('dotenv').config();
 
 const app = express();
 const port = 3000;
-const db = new Database('data.db');
+const dbPath = process.env.DB_PATH || 'data.db'; 
+const db = new Database(dbPath);
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 app.use(express.json());
