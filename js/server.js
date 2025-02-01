@@ -87,25 +87,35 @@ app.post('/request-login', async (req, res) => {
 
 // ✅ 2. Проверка кода и генерация JWT-токена
 app.post('/verify-login', (req, res) => {
-    const { chatId, code } = req.body;
+    try {
+        const { chatId, code } = req.body;
 
-    // Получаем код из БД
-    const record = db.prepare('SELECT * FROM login_codes WHERE chat_id = ?').get(chatId);
-    
-    if (!record || record.code !== code || new Date(record.expires_at) < new Date()) {
-        return res.status(400).json({ success: false, error: '❌ Неверный или просроченный код' });
+        // Проверяем входные данные
+        if (!chatId || !code) {
+            return res.status(400).json({ success: false, error: '❌ Chat ID и код обязательны.' });
+        }
+
+        // Получаем код из БД
+        const record = db.prepare('SELECT * FROM login_codes WHERE chat_id = ?').get(chatId);
+        
+        if (!record || record.code !== code || new Date(record.expires_at) < new Date()) {
+            return res.status(400).json({ success: false, error: '❌ Неверный или просроченный код' });
+        }
+
+        // Удаляем использованный код
+        db.prepare('DELETE FROM login_codes WHERE chat_id = ?').run(chatId);
+
+        // Создаем JWT-токен (действует 7 дней)
+        const token = jwt.sign({ chatId }, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRATION || '7d' });
+
+        // Отправляем токен в cookie
+        res.cookie('auth_token', token, { httpOnly: true, secure: true, sameSite: 'Strict' });
+
+        res.json({ success: true, message: '✅ Авторизация успешна!', token });
+    } catch (error) {
+        console.error('❌ Ошибка при обработке запроса /verify-login:', error);
+        res.status(500).json({ success: false, error: '❌ Внутренняя ошибка сервера.' });
     }
-
-    // Удаляем использованный код
-    db.prepare('DELETE FROM login_codes WHERE chat_id = ?').run(chatId);
-
-    // Создаем JWT-токен (действует 7 дней)
-    const token = jwt.sign({ chatId }, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRATION || '7d' });
-
-    // Отправляем токен в cookie
-    res.cookie('auth_token', token, { httpOnly: true, secure: true, sameSite: 'Strict' });
-
-    res.json({ success: true, message: '✅ Авторизация успешна!', token });
 });
 
 // ✅ 3. Middleware для проверки JWT
@@ -133,13 +143,18 @@ app.get('/dashboard', authenticateToken, (req, res) => {
 
 // ✅ 5. Получение данных пользователя
 app.get('/api/user', authenticateToken, (req, res) => {
-    const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(req.user.chatId);
-    
-    if (!user) {
-        return res.status(404).json({ success: false, error: '❌ Пользователь не найден' });
-    }
+    try {
+        const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(req.user.chatId);
+        
+        if (!user) {
+            return res.status(404).json({ success: false, error: '❌ Пользователь не найден' });
+        }
 
-    res.json({ success: true, user });
+        res.json({ success: true, user });
+    } catch (error) {
+        console.error('❌ Ошибка при обработке запроса /api/user:', error);
+        res.status(500).json({ success: false, error: '❌ Внутренняя ошибка сервера.' });
+    }
 });
 
 // ✅ 6. Выход (очистка токена)
