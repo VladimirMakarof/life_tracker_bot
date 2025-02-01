@@ -27,7 +27,7 @@
     </header>
 
     <main>
-        <section id="profile">
+        <!-- <section id="profile">
             <div class="section-inner">
                 <h2>👤 Ваш профиль</h2>
                 <p id="userInfo">Загрузка данных...</p>
@@ -51,7 +51,41 @@
                 <button id="saveDiary">Сохранить</button>
                 <ul id="diaryList"></ul>
             </div>
-        </section>
+        </section> -->
+
+
+        <section id="profile" class="profile-section">
+            <div class="profile-section__inner">
+              <h2 class="profile-section__title">Ваш профиль</h2>
+              <form id="profileForm" class="profile-section__form">
+                <label for="name" class="profile-section__label">Имя:</label>
+                <input type="text" id="name" required class="profile-section__input">
+          
+                <label for="birthdate" class="profile-section__label">Дата рождения:</label>
+                <input type="text" id="birthdate" placeholder="ДД.ММ.ГГГГ" class="profile-section__input">
+          
+                <label for="target_age" class="profile-section__label">Целевой возраст:</label>
+                <input type="number" id="target_age" class="profile-section__input">
+          
+                <label for="language" class="profile-section__label">Язык:</label>
+                <select id="language" class="profile-section__input">
+                  <option value="en">English</option>
+                  <option value="ru">Русский</option>
+                </select>
+          
+                <label for="morning_time" class="profile-section__label">Время утреннего уведомления:</label>
+                <input type="text" id="morning_time" placeholder="08:00" class="profile-section__input">
+          
+                <label for="evening_time" class="profile-section__label">Время вечернего уведомления:</label>
+                <input type="text" id="evening_time" placeholder="20:00" class="profile-section__input">
+          
+                <button type="submit" class="profile-section__button">Сохранить изменения</button>
+              </form>
+              <p id="profileInfo" class="profile-section__message"></p>
+              <button id="deleteAccountBtn" class="profile-section__delete-btn">Удалить аккаунт</button>
+            </div>
+          </section>
+          
     </main>
 
     <footer>
