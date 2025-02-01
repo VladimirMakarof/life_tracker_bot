@@ -48,31 +48,42 @@ db.prepare(`
 `).run();
 
 // ✅ 1. Генерация кода и отправка через Telegram
-app.post('/request-login', (req, res) => {
-    const { chatId } = req.body;
+app.post('/request-login', async (req, res) => {
+    try {
+        const { chatId } = req.body;
 
-    // Проверяем, существует ли пользователь
-    const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
-    if (!user) {
-        return res.status(400).json({ success: false, error: 'Chat ID не найден.' });
+        // Проверяем, был ли передан chatId
+        if (!chatId) {
+            return res.status(400).json({ success: false, error: 'Chat ID не предоставлен.' });
+        }
+
+        // Проверяем, существует ли пользователь
+        const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'Пользователь с таким Chat ID не найден.' });
+        }
+
+        // Генерируем случайный 6-значный код
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // Код действует 5 минут
+
+        // Сохраняем код в базе данных
+        db.prepare(`
+            INSERT INTO login_codes (chat_id, code, expires_at) 
+            VALUES (?, ?, ?)
+            ON CONFLICT(chat_id) DO UPDATE SET code = excluded.code, expires_at = excluded.expires_at
+        `).run(chatId, code, expiresAt);
+
+        // Отправляем код пользователю в Telegram
+        await bot.sendMessage(chatId, `🚀 *Ваш код для входа на сайт:* \`${code}\` (действителен 5 минут)`, { parse_mode: 'Markdown' });
+
+        res.json({ success: true, message: 'Код отправлен в Telegram.' });
+    } catch (error) {
+        console.error('Ошибка при обработке запроса /request-login:', error);
+        res.status(500).json({ success: false, error: 'Внутренняя ошибка сервера.' });
     }
-
-    // Генерируем случайный код
-    const code = Math.floor(100000 + Math.random() * 900000);
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // Код действует 5 минут
-
-    // Сохраняем код в БД
-    db.prepare(`
-        INSERT INTO login_codes (chat_id, code, expires_at) 
-        VALUES (?, ?, ?)
-        ON CONFLICT(chat_id) DO UPDATE SET code = excluded.code, expires_at = excluded.expires_at
-    `).run(chatId, code, expiresAt);
-
-    // Отправляем код пользователю в Telegram
-    bot.sendMessage(chatId, `🚀 *Ваш код для входа на сайт:* \`${code}\` (действителен 5 минут)`, { parse_mode: 'Markdown' });
-
-    res.json({ success: true, message: 'Код отправлен в Telegram.' });
 });
+
 
 // ✅ 2. Проверка кода и генерация JWT-токена
 app.post('/verify-login', (req, res) => {
