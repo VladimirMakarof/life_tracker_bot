@@ -162,8 +162,8 @@ bot.onText(/\/set_setting (\w+) (.+)/, (msg, match) => {
 // Команда для получения Chat ID
 bot.onText(/\/getid/, (msg) => {
   const chatId = msg.chat.id;
+  console.log(`Получена команда /getid от пользователя с chat_id: ${chatId}`);
   
-  // Проверяем, существует ли пользователь в базе
   const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
   if (user) {
     bot.sendMessage(chatId, `Ваш Chat ID: ${chatId}`);
@@ -171,6 +171,7 @@ bot.onText(/\/getid/, (msg) => {
     bot.sendMessage(chatId, 'Вы не зарегистрированы. Пожалуйста, используйте команду /start для регистрации.');
   }
 });
+
 
 
 bot.onText(/\/get_setting (\w+)/, (msg, match) => {
