@@ -31,7 +31,7 @@ function verifyGitHubSignature(req) {
   return `sha256=${hmac}` === signature;
 }
 
-// ✅ Обработчик вебхука от GitHub
+// ✅ Обработчик вебхука от GitHub 
 app.post('/github-webhook', async (req, res) => {
   try {
     if (!verifyGitHubSignature(req)) {
