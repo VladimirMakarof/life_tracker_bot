@@ -12,6 +12,7 @@ const token = process.env.BOT_TOKEN;
 // const bot = new TelegramBot(token, { polling: true });  
 
 const bot = new TelegramBot(token);
+const url = process.env.URL || 'https://lifetrackerbot.ru/';
 bot.setWebHook(`${url}/bot${token}`);
 
 const dbPath = process.env.DB_PATH;
