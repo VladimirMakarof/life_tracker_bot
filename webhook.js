@@ -18,7 +18,7 @@ const SECRET = process.env.SECRET_TOKEN;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key';
 
-// Проверка обязательных переменных окружения
+// Проверка обязательных переменных окружения  
 if (!SECRET || !BOT_TOKEN || !url) {
   console.error('❌ ОШИБКА: Не все переменные окружения установлены.');
   process.exit(1);
