@@ -24,7 +24,7 @@ if (!SECRET || !BOT_TOKEN || !url) {
   process.exit(1);
 }
 
-// Инициализация базы данных
+// Инициализация базы данных 
 const db = new Database(dbPath);
 
 // Инициализация Telegram-бота и установка вебхука для него
