@@ -131,8 +131,8 @@ db.prepare(`
   CREATE INDEX IF NOT EXISTS idx_settings_user_key 
   ON settings(user_id, key)
 `).run();
-const bot = new TelegramBot(BOT_TOKEN);
-bot.setWebHook(`${url}/bot${BOT_TOKEN}`);
+const bot = new TelegramBot(BOT_TOKEN, {webHook: {port: 3000}});
+bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET });
 
 // Подключение middleware
 app.use('/github-webhook', express.raw({ type: '*/*' })); // для GitHub
