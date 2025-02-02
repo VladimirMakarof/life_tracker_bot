@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 const url = process.env.URL || 'https://lifetrackerbot.ru/';
 const dbPath = process.env.DB_PATH || 'data.db'; 
 const db = new Database(dbPath);
-// const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true }); 
+// const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });  
 const bot = new TelegramBot(process.env.BOT_TOKEN);
 
 bot.setWebHook(`${url}/bot${process.env.BOT_TOKEN}`);
