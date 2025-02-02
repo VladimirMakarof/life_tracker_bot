@@ -19,6 +19,8 @@ bot.setWebHook(`${url}/bot${process.env.BOT_TOKEN}`);
 
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(express.static('pages'));
 
 app.post(`/bot${process.env.BOT_TOKEN}`, (req, res) => {
   bot.processUpdate(req.body);
@@ -29,11 +31,10 @@ app.post(`/bot${process.env.BOT_TOKEN}`, (req, res) => {
 //   console.log(`Express server is listening on ${port}`);
 // });
 
-app.use(express.json());
-app.use(cookieParser());
+// app.use(express.json());
 
-// Статические файлы (например, для dashboard.html)
-app.use(express.static('pages'));
+
+
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key';
 
@@ -207,5 +208,5 @@ app.delete('/api/user', authenticateToken, (req, res) => {
 });
 
 
-// Запускаем сервер
+// Запускаем сервер 
 app.listen(port, () => console.log(`🚀 Сервер запущен на порту ${port}`));
