@@ -18,7 +18,10 @@ if (!SECRET || !BOT_TOKEN || !URL) {
 
 app.use(express.json());
 
-// ✅ Функция проверки подписи GitHub для защиты вебхуков
+// ✅ Используем raw body для маршрута GitHub
+app.use('/github-webhook', express.raw({ type: 'application/json' }));
+
+// ✅ Функция проверки подписи GitHub
 function verifyGitHubSignature(req) {
   const signature = req.headers['x-hub-signature-256'];
   if (!signature) {
@@ -26,12 +29,12 @@ function verifyGitHubSignature(req) {
     return false;
   }
 
-  const body = JSON.stringify(req.body);
-  const hmac = crypto.createHmac('sha256', SECRET).update(body).digest('hex');
+  // Используем сырые данные для вычисления HMAC
+  const hmac = crypto.createHmac('sha256', SECRET).update(req.body).digest('hex');
   return `sha256=${hmac}` === signature;
 }
 
-// ✅ Обработчик вебхука от GitHub 
+// ✅ Обработчик вебхука от GitHub
 app.post('/github-webhook', async (req, res) => {
   try {
     if (!verifyGitHubSignature(req)) {
@@ -39,7 +42,9 @@ app.post('/github-webhook', async (req, res) => {
       return res.status(403).send('Неверная подпись');
     }
 
-    console.log('🔄 Получен вебхук от GitHub:', req.body);
+    // Парсим JSON
+    const parsedBody = JSON.parse(req.body.toString('utf8'));
+    console.log('🔄 Получен вебхук от GitHub:', parsedBody);
 
     // Выполняем `git pull` для обновления кода
     exec('git fetch origin && git reset --hard origin/main', { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' }, (err, stdout, stderr) => {
@@ -56,6 +61,7 @@ app.post('/github-webhook', async (req, res) => {
     res.status(500).send('Внутренняя ошибка сервера.');
   }
 });
+
 
 // ✅ Обработчик вебхука от Telegram
 app.post(`/bot${BOT_TOKEN}`, async (req, res) => {
