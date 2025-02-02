@@ -18,7 +18,7 @@ if (!SECRET || !BOT_TOKEN || !URL) {
 
 app.use(express.json());
 
-// ✅ Используем raw body для маршрута GitHub 
+// ✅ Используем raw body для маршрута GitHub  
 app.use('/github-webhook', express.raw({ type: 'application/json' }));
 
 // ✅ Функция проверки подписи GitHub
