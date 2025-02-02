@@ -1,8 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const axios = require('axios'); // Загружаем один раз
-require('dotenv').config();
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
