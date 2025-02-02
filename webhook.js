@@ -11,15 +11,14 @@ const Database = require('better-sqlite3');
 const TelegramBot = require('node-telegram-bot-api');
 const schedule = require('node-schedule');
 
-// Создаем объект логирования (можете его расширять по необходимости)
+// Логгер
 const logger = {
   info: (...args) => console.log('[INFO]', ...args),
   error: (...args) => console.error('[ERROR]', ...args)
 };
 
+// Настройки
 const app = express();
-
-// Настройки из переменных окружения
 const port = process.env.PORT || 3000;
 const url = process.env.URL || 'https://lifetrackerbot.ru/';
 const dbPath = process.env.DB_PATH || 'data.db';
@@ -27,13 +26,12 @@ const SECRET = process.env.SECRET_TOKEN;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key';
 
-// Проверка обязательных переменных окружения
 if (!SECRET || !BOT_TOKEN || !url) {
   console.error('❌ ОШИБКА: Не все переменные окружения установлены.');
   process.exit(1);
 }
 
-// Инициализация базы данных с настройками WAL
+// Инициализация базы данных
 const db = new Database(dbPath, { timeout: 5000 });
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');
@@ -133,18 +131,13 @@ db.prepare(`
   CREATE INDEX IF NOT EXISTS idx_settings_user_key 
   ON settings(user_id, key)
 `).run();
-
-// Инициализация Telegram-бота и установка вебхука для него
 const bot = new TelegramBot(BOT_TOKEN);
 bot.setWebHook(`${url}/bot${BOT_TOKEN}`);
 
 // Подключение middleware
-// Для GitHub вебхука используем raw body, чтобы сохранить данные для проверки подписи
-app.use('/github-webhook', express.raw({ type: '*/*' }));
-// Для остальных маршрутов используем стандартный JSON-парсер и cookieParser
+app.use('/github-webhook', express.raw({ type: '*/*' })); // для GitHub
 app.use(express.json());
 app.use(cookieParser());
-// Раздача статических файлов (например, для страниц личного кабинета)
 app.use(express.static('pages'));
 
 // -------------------------
@@ -173,11 +166,8 @@ app.post('/github-webhook', async (req, res) => {
       console.error('❌ Неверная подпись GitHub');
       return res.status(403).send('Неверная подпись');
     }
-    // Парсим JSON вручную, так как req.body — Buffer
     const parsedBody = JSON.parse(req.body.toString('utf8'));
     console.log('🔄 Получен вебхук от GitHub:', parsedBody);
-
-    // Выполняем git pull для обновления кода
     exec(
       'git fetch origin && git reset --hard origin/main && git clean -fd',
       { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' },
@@ -237,20 +227,8 @@ async function setTelegramWebhook() {
 setTelegramWebhook();
 
 // -------------------------
-// Серверная логика: API, авторизация, личный кабинет
+// Серверная логика: API, авторизация и личный кабинет
 // -------------------------
-
-// Таблица для временных кодов авторизации
-db.prepare(`
-    CREATE TABLE IF NOT EXISTS login_codes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chat_id TEXT UNIQUE,
-        code TEXT,
-        expires_at TEXT
-    )
-`).run();
-
-// 1. Генерация кода и отправка через Telegram
 app.post('/request-login', async (req, res) => {
   try {
     const { chatId } = req.body;
@@ -276,7 +254,6 @@ app.post('/request-login', async (req, res) => {
   }
 });
 
-// 2. Проверка кода и генерация JWT-токена
 app.post('/verify-login', (req, res) => {
   try {
     const { chatId, code } = req.body;
@@ -312,12 +289,10 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// 3. Защищённый маршрут (личный кабинет)
 app.get('/dashboard', authenticateToken, (req, res) => {
   res.json({ message: `👋 Добро пожаловать! Ваш Chat ID: ${req.user.chatId}` });
 });
 
-// 4. Получение данных пользователя
 app.get('/api/user', authenticateToken, (req, res) => {
   try {
     const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(req.user.chatId);
@@ -331,13 +306,11 @@ app.get('/api/user', authenticateToken, (req, res) => {
   }
 });
 
-// 5. Выход (очистка токена)
 app.post('/logout', (req, res) => {
   res.clearCookie('auth_token');
   res.json({ success: true, message: '✅ Вы вышли из системы' });
 });
 
-// 6. Обновление профиля пользователя (PUT)
 app.put('/api/user', authenticateToken, (req, res) => {
   const { name, birthdate, target_age, language, morning_time, evening_time } = req.body;
   const result = db.prepare(`
@@ -352,7 +325,6 @@ app.put('/api/user', authenticateToken, (req, res) => {
   }
 });
 
-// 7. Удаление аккаунта пользователя (DELETE)
 app.delete('/api/user', authenticateToken, (req, res) => {
   const chatId = req.user.chatId;
   const userId = db.prepare('SELECT id FROM users WHERE chat_id = ?').pluck().get(chatId);
@@ -378,19 +350,20 @@ app.delete('/api/user', authenticateToken, (req, res) => {
 // Логика бота: команды и взаимодействие
 // -------------------------
 
+const userStates = {};
+
 // Обработка команды /test
 bot.onText(/\/test/, (msg) => {
   bot.sendMessage(msg.chat.id, 'Бот работает!');
 });
 
-// Обработка команды /start (регистрация пользователя)
+// Обработка команды /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const userLanguage = (msg.from.language_code && msg.from.language_code.startsWith('ru')) ? 'ru' : 'en';
   const username = msg.from.username || 'unknown';
 
   let user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
-
   if (!user) {
     db.prepare(`
       INSERT INTO users (chat_id, username, language)
@@ -404,25 +377,18 @@ bot.onText(/\/start/, (msg) => {
   }
 });
 
-// Для хранения состояний пользователей
-const userStates = {};
-
-// Обработка входящих сообщений для регистрации и опросов
+// Обработка входящих сообщений для регистрации
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
-
-  if (!userStates[chatId]) return; // Если пользователь не в процессе регистрации
-
+  if (!userStates[chatId]) return;
   const state = userStates[chatId];
-
   switch (state.step) {
     case 'ask_name':
       db.prepare('UPDATE users SET name = ? WHERE chat_id = ?').run(text, chatId);
       userStates[chatId].step = 'ask_birthdate';
       bot.sendMessage(chatId, 'Отлично! Теперь введи свою дату рождения в формате ДД.ММ.ГГГГ:');
       break;
-
     case 'ask_birthdate':
       if (/^\d{2}\.\d{2}\.\d{4}$/.test(text)) {
         db.prepare('UPDATE users SET birthdate = ? WHERE chat_id = ?').run(text, chatId);
@@ -432,7 +398,6 @@ bot.on('message', (msg) => {
         bot.sendMessage(chatId, 'Неверный формат даты. Попробуй еще раз (ДД.ММ.ГГГГ):');
       }
       break;
-
     case 'ask_target_age':
       if (/^\d+$/.test(text)) {
         db.prepare('UPDATE users SET target_age = ? WHERE chat_id = ?').run(parseInt(text), chatId);
@@ -442,7 +407,6 @@ bot.on('message', (msg) => {
         bot.sendMessage(chatId, 'Пожалуйста, введи число:');
       }
       break;
-
     case 'ask_morning_time':
       if (/^\d{2}:\d{2}$/.test(text)) {
         db.prepare('UPDATE users SET morning_time = ? WHERE chat_id = ?').run(text, chatId);
@@ -452,7 +416,6 @@ bot.on('message', (msg) => {
         bot.sendMessage(chatId, 'Неверный формат времени. Попробуй еще раз (например, 08:00):');
       }
       break;
-
     case 'ask_evening_time':
       if (/^\d{2}:\d{2}$/.test(text)) {
         try {
@@ -607,7 +570,7 @@ bot.on('callback_query', (query) => {
   }
 });
 
-// Определяем вспомогательную функцию для проверки формата времени
+// Вспомогательная функция для проверки формата времени
 function isValidTime(time) {
   if (!/^\d{2}:\d{2}$/.test(time)) return false;
   const [hours, minutes] = time.split(':').map(Number);
@@ -678,41 +641,5 @@ function calculateTimeLeft(user) {
   return yearsLeft > 0 ? `${yearsLeft} лет` : 'Цель достигнута!';
 }
 
-// -------------------------
-// Планировщик задач (каждую минуту)
-// -------------------------
-schedule.scheduleJob('* * * * *', () => {
-  const now = new Date();
-  const currentTime = now.toTimeString().slice(0, 5); // Формат HH:MM
-
-  // Утренние уведомления
-  const morningUsers = db.prepare('SELECT * FROM users WHERE morning_time = ?').all(currentTime);
-  morningUsers.forEach(user => {
-    console.log('[DEBUG] morningUsers item:', user);
-    if (!user.birthdate || !user.target_age) {
-      console.log('[DEBUG] Skip user because birthdate or target_age is empty:', user.chat_id);
-      return;
-    }
-    bot.sendMessage(
-      user.chat_id,
-      `Доброе утро, ${user.name || 'друг'}! Осталось ${calculateTimeLeft(user)} до цели.`
-    );
-  });
-
-  // Вечерние уведомления
-  const eveningUsers = db.prepare('SELECT * FROM users WHERE evening_time = ?').all(currentTime);
-  eveningUsers.forEach(user => {
-    console.log('[DEBUG] eveningUsers item:', user);
-    if (!user.birthdate || !user.target_age) {
-      console.log('[DEBUG] Skip user because birthdate or target_age is empty:', user.chat_id);
-      return;
-    }
-    bot.sendMessage(
-      user.chat_id,
-      `Добрый вечер, ${user.name}! Сегодня ты стал на один день ближе к своей цели. Спокойной ночи!`
-    );
-  });
-});
-
-// Запускаем сервер (один раз!)
+// Запускаем сервер
 app.listen(port, () => console.log(`🚀 Сервер запущен на порту ${port}`));
