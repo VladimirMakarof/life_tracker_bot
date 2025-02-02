@@ -2,8 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const { exec } = require('child_process');
 const crypto = require('crypto');
-const axios = require('axios'); // Загружаем один раз
-
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,10 +14,8 @@ if (!SECRET || !BOT_TOKEN || !URL) {
   process.exit(1);
 }
 
-app.use(express.json());
-
-// ✅ Используем raw body для маршрута GitHub  
-app.use('/github-webhook', express.raw({ type: 'application/json' }));
+// ✅ Используем raw body для обработки подписи GitHub
+app.use('/github-webhook', express.raw({ type: '*/*' }));
 
 // ✅ Функция проверки подписи GitHub
 function verifyGitHubSignature(req) {
@@ -29,9 +25,15 @@ function verifyGitHubSignature(req) {
     return false;
   }
 
-  // Используем сырые данные для вычисления HMAC
-  const hmac = crypto.createHmac('sha256', SECRET).update(req.body).digest('hex');
-  return `sha256=${hmac}` === signature;
+  try {
+    const hmac = crypto.createHmac('sha256', Buffer.from(SECRET, 'utf8'));
+    hmac.update(req.body);
+    const digest = `sha256=${hmac.digest('hex')}`;
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+  } catch (error) {
+    console.error('❌ Ошибка при проверке подписи:', error);
+    return false;
+  }
 }
 
 // ✅ Обработчик вебхука от GitHub
@@ -42,12 +44,12 @@ app.post('/github-webhook', async (req, res) => {
       return res.status(403).send('Неверная подпись');
     }
 
-    // Парсим JSON
+    // Парсим JSON вручную, так как req.body - это Buffer
     const parsedBody = JSON.parse(req.body.toString('utf8'));
     console.log('🔄 Получен вебхук от GitHub:', parsedBody);
 
     // Выполняем `git pull` для обновления кода
-    exec('git fetch origin && git reset --hard origin/main', { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' }, (err, stdout, stderr) => {
+    exec('git pull origin main', { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' }, (err, stdout, stderr) => {
       if (err) {
         console.error(`❌ Ошибка при обновлении: ${stderr}`);
         return res.status(500).send('Ошибка при обновлении');
