@@ -65,7 +65,7 @@ app.post('/github-webhook', async (req, res) => {
 });
 
 
-// ✅ Обработчик вебхука от Telegram
+// ✅ Обработчик вебхука от Telegram 
 app.post(`/bot${BOT_TOKEN}`, async (req, res) => {
   try {
     const message = req.body.message;
