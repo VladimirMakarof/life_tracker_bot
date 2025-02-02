@@ -25,9 +25,9 @@ app.post(`/bot${process.env.BOT_TOKEN}`, (req, res) => {
   res.sendStatus(200);
 });
 
-app.listen(port, () => {
-  console.log(`Express server is listening on ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Express server is listening on ${port}`);
+// });
 
 app.use(express.json());
 app.use(cookieParser());
