@@ -53,6 +53,26 @@ if (userVersion < 2) {
   db.pragma('user_version = 2');
 }
 
+if (userVersion < 3) {
+  // Проверяем, есть ли колонка subscription_plan
+  const hasSubPlan = db.prepare(`
+    SELECT COUNT(*) AS column_exists
+    FROM pragma_table_info('users')
+    WHERE name = 'subscription_plan'
+  `).get().column_exists;
+
+  // Если нет — добавляем
+  if (!hasSubPlan) {
+    db.prepare(`
+      ALTER TABLE users
+      ADD COLUMN subscription_plan TEXT DEFAULT 'free'
+    `).run();
+  }
+
+  // Повышаем версию схемы до 3
+  db.pragma('user_version = 3');
+}
+
 // Создание таблиц и индексов
 db.prepare(`
   CREATE TABLE IF NOT EXISTS users (
