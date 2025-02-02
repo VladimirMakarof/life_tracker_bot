@@ -20,7 +20,7 @@ const logger = {
 // Настройки
 const app = express();
 const port = process.env.PORT || 3000;
-const url = process.env.URL || 'https://lifetrackerbot.ru/';
+const url = process.env.URL || 'https://lifetrackerbot.ru';
 const dbPath = process.env.DB_PATH || 'data.db';
 const SECRET = process.env.SECRET_TOKEN;
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -51,6 +51,38 @@ if (userVersion < 2) {
     `).run();
   }
   db.pragma('user_version = 2');
+}
+
+
+if (userVersion < 3) {
+  // Проверяем, есть ли колонка subscription_plan
+  const hasSubPlan = db.prepare(`
+    SELECT COUNT(*) AS column_exists
+    FROM pragma_table_info('users')
+    WHERE name = 'subscription_plan'
+  `).get().column_exists;
+
+  // Если нет — добавляем
+  if (!hasSubPlan) {
+    db.prepare(`
+      ALTER TABLE users
+      ADD COLUMN subscription_plan TEXT DEFAULT 'free'
+    `).run();
+  }
+
+  // Повышаем версию схемы до 3
+  db.pragma('user_version = 3');
+}
+
+// Миграция для consent_given
+if (userVersion < 4) {
+  const hasConsent = db
+    .prepare("SELECT COUNT(*) AS c FROM pragma_table_info('users') WHERE name='consent_given'")
+    .get().c;
+  if (!hasConsent) {
+    db.prepare("ALTER TABLE users ADD COLUMN consent_given INTEGER DEFAULT 0").run();
+  }
+  db.pragma('user_version = 4');
 }
 
 // Создание таблиц и индексов
@@ -131,8 +163,18 @@ db.prepare(`
   CREATE INDEX IF NOT EXISTS idx_settings_user_key 
   ON settings(user_id, key)
 `).run();
-const bot = new TelegramBot(BOT_TOKEN, {webHook: {port: 3000}});
-bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET });
+ const bot = new TelegramBot(BOT_TOKEN, {webHook: {port: 3000}});
+// const bot = new TelegramBot(BOT_TOKEN);
+// bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET });
+
+bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET })
+  .then((resp) => {
+    console.log('✅ Вебхук для Telegram установлен успешно', resp.data);
+  })
+  .catch((err) => {
+    console.error('❌ Ошибка при установке вебхука для Telegram:', err);
+  });
+
 
 // Подключение middleware
 app.use('/github-webhook', express.raw({ type: '*/*' })); // для GitHub
@@ -143,7 +185,7 @@ app.use(express.static('pages'));
 // -------------------------
 // Обработка GitHub вебхука
 // -------------------------
-function verifyGitHubSignature(req) {
+ function verifyGitHubSignature(req) {
   const signature = req.headers['x-hub-signature-256'];
   if (!signature) {
     console.error('❌ Подпись отсутствует.');
@@ -151,12 +193,12 @@ function verifyGitHubSignature(req) {
   }
   try {
     const hmac = crypto.createHmac('sha256', Buffer.from(SECRET, 'utf8'));
-    hmac.update(req.body);
+   hmac.update(req.body);
     const digest = `sha256=${hmac.digest('hex')}`;
     return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
-  } catch (error) {
-    console.error('❌ Ошибка при проверке подписи:', error);
-    return false;
+ } catch (error) {
+  console.error('❌ Ошибка при проверке подписи:', error);
+   return false;
   }
 }
 
@@ -167,7 +209,7 @@ app.post('/github-webhook', async (req, res) => {
       return res.status(403).send('Неверная подпись');
     }
     const parsedBody = JSON.parse(req.body.toString('utf8'));
-    console.log('🔄 Получен вебхук от GitHub:', parsedBody);
+   console.log('🔄 Получен вебхук от GitHub:', parsedBody);
     exec(
       'git fetch origin && git reset --hard origin/main && git clean -fd',
       { cwd: '/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru' },
@@ -189,15 +231,15 @@ app.post('/github-webhook', async (req, res) => {
 // -------------------------
 // Обработка Telegram вебхука
 // -------------------------
-app.post(`/bot${BOT_TOKEN}`, async (req, res) => {
-  try {
+ app.post(`/bot${BOT_TOKEN}`, async (req, res) => {
+ try {
     const message = req.body.message;
-    if (message && message.text) {
-      const chatId = message.chat.id;
+   if (message && message.text) {
+     const chatId = message.chat.id;
       const responseText = `Вы написали: ${message.text}`;
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: chatId,
-        text: responseText,
+    chat_id: chatId,
+      text: responseText,
       });
       console.log(`📨 Сообщение отправлено пользователю ${chatId}: ${responseText}`);
     }
