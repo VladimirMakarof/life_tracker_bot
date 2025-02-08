@@ -80,7 +80,7 @@
 // 	// 📌 Выход
 // 	logoutBtn.addEventListener('click', () => {
 // 			fetch('/api/logout', { method: 'POST' }).then(() => {
-// 					window.location.href = 'index.html';
+// 	 				window.location.href = 'index.html';
 // 			});
 // 	});
 
