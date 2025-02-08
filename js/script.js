@@ -101,33 +101,33 @@ document.addEventListener('DOMContentLoaded', () => {
 	// 		}
 	// });
 
-	codeForm.addEventListener('submit', async (e) => {
-		e.preventDefault();
-		const chatId = document.getElementById('chatId').value.trim();
-		const authCode = document.getElementById('authCode').value.trim();
-		if (!chatId || !authCode) {
-			loginMessage.textContent = "Введите ваш Chat ID и код.";
-			return;
-		}
+	// codeForm.addEventListener('submit', async (e) => {
+	// 	e.preventDefault();
+	// 	const chatId = document.getElementById('chatId').value.trim();
+	// 	const authCode = document.getElementById('authCode').value.trim();
+	// 	if (!chatId || !authCode) {
+	// 		loginMessage.textContent = "Введите ваш Chat ID и код.";
+	// 		return;
+	// 	}
 		
-		try {
-			const response = await fetch('/verify-deep-link', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ chatId, code: authCode })
-			});
-			const data = await response.json();
-			if (data.success) {
-				// Вместо автоматического редиректа выводим сообщение с ссылкой
-				loginMessage.innerHTML = "Авторизация успешна! <a href='/dashboard'>Перейти в Личный Кабинет</a>";
-			} else {
-				loginMessage.textContent = data.error || "Ошибка авторизации.";
-			}
-		} catch (error) {
-			console.error("Ошибка при запросе /verify-deep-link:", error);
-			loginMessage.textContent = "Ошибка сети или сервера.";
-		}
-	});
+	// 	try {
+	// 		const response = await fetch('/verify-deep-link', {
+	// 			method: 'POST',
+	// 			headers: { 'Content-Type': 'application/json' },
+	// 			body: JSON.stringify({ chatId, code: authCode })
+	// 		});
+	// 		const data = await response.json();
+	// 		if (data.success) {
+	// 			// Вместо автоматического редиректа выводим сообщение с ссылкой
+	// 			loginMessage.innerHTML = "Авторизация успешна! <a href='/dashboard'>Перейти в Личный Кабинет</a>";
+	// 		} else {
+	// 			loginMessage.textContent = data.error || "Ошибка авторизации.";
+	// 		}
+	// 	} catch (error) {
+	// 		console.error("Ошибка при запросе /verify-deep-link:", error);
+	// 		loginMessage.textContent = "Ошибка сети или сервера.";
+	// 	}
+	// });
 
 
 
