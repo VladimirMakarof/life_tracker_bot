@@ -11,7 +11,7 @@ const Database = require('better-sqlite3');
 const TelegramBot = require('node-telegram-bot-api');
 const schedule = require('node-schedule');
 
-// Логгер
+// Логгер 123
 const logger = {
   info: (...args) => console.log('[INFO]', ...args),
   error: (...args) => console.error('[ERROR]', ...args)
