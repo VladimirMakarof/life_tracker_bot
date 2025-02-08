@@ -9,7 +9,7 @@ module.exports = {
         NODE_ENV: "development" // Настройки для разработки
       },
       env_production: {
-        NODE_ENV: "production" // Настройки для продакшена
+        NODE_ENV: "production" // Настройки для продакшена  
       }
     }
   ]
