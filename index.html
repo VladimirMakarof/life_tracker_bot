@@ -126,12 +126,12 @@
             <div class="login-section__inner">
               <h2 class="login-section__title">Личный кабинет</h2>
               <p class="login-section__subtitle">
-                Используйте Telegram для безопасной авторизации. Нажмите кнопку ниже, чтобы авторизоваться.
+                Авторизуйтесь через Telegram для доступа к личному кабинету.
               </p>
           
               <!-- Блок авторизации через Telegram Login Widget -->
               <div class="login-section__form-container">
-                <!-- Telegram Login Widget -->
+                <!-- Telegram Login Widget: виджет автоматически отобразит кнопку авторизации -->
                 <script async src="https://telegram.org/js/telegram-widget.js?15"
                         data-telegram-login="life_tracker_app_bot"
                         data-size="large"
@@ -139,7 +139,6 @@
                         data-request-access="write"
                         data-callback="onTelegramAuth">
                 </script>
-                <!-- Сообщение для пользователя -->
                 <p id="loginMessage" class="login-section__message"></p>
               </div>
           
@@ -148,12 +147,13 @@
                 <h3 class="login-section__instruction-title">Как это работает?</h3>
                 <ol class="login-section__instruction-list">
                   <li>Нажмите на кнопку авторизации через Telegram.</li>
-                  <li>После нажатия бот автоматически проверит данные и отправит вам подтверждение авторизации.</li>
-                  <li>Если авторизация успешна, вы будете перенаправлены в Личный Кабинет.</li>
+                  <li>Виджет автоматически передаст данные вашего аккаунта вашему серверу.</li>
+                  <li>После успешной проверки вы попадёте в личный кабинет.</li>
                 </ol>
               </div>
             </div>
           </section>
+          
           
           
           

@@ -135,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Эта функция будет вызвана автоматически после авторизации через Telegram Login Widget
 function onTelegramAuth(user) {
   console.log("Пользователь авторизовался через Telegram:", user);
-  // Отправляем данные пользователя на сервер для проверки подписи и создания сессии
   fetch('/telegram-auth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -144,10 +143,8 @@ function onTelegramAuth(user) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      // Если авторизация прошла успешно, перенаправляем пользователя в личный кабинет
       window.location.href = '/dashboard';
     } else {
-      // Если возникла ошибка, выводим сообщение
       document.getElementById('loginMessage').textContent = "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
     }
   })
@@ -156,6 +153,7 @@ function onTelegramAuth(user) {
     document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
   });
 }
+
 
 // Другой код (например, для меню, прокрутки, аккордеона и т.д.)
 document.addEventListener('DOMContentLoaded', () => {
