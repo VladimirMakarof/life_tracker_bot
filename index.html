@@ -124,41 +124,34 @@
 
         <section id="login" class="login-section">
             <div class="login-section__inner">
-                <h2 class="login-section__title">Личный кабинет</h2>
-                <p class="login-section__subtitle">
-                    Используйте Telegram для безопасной авторизации. После входа вы сможете управлять своими целями и дневником.
-                </p>
-        
-                <!-- 📌 Форма авторизации -->
-                <div class="login-section__form-container">
-                    <form id="loginForm" class="login-section__form">
-                        <label for="chatId" class="login-section__label">Введите ваш Chat ID:</label>
-                        <input type="text" id="chatId" required placeholder="Например, 123456789" class="login-section__input">
-                        <button type="submit" class="login-section__button">Получить код</button>
-                    </form>
-        
-                    <!-- Блок ввода кода  --> 
-                    <form id="codeForm" class="login-section__form login-section__form--hidden">
-                        <label for="authCode" class="login-section__label">Введите код из Telegram:</label>
-                        <input type="text" id="authCode" required placeholder="6-значный код" class="login-section__input">
-                        <button type="submit" class="login-section__button">Войти</button>
-                    </form>
-        
-                    <p id="loginMessage" class="login-section__message"></p>
-                </div>
-        
-                <!-- ℹ️ Инструкция -->
-                <div class="login-section__instruction">
-                    <h3 class="login-section__instruction-title">Как узнать ваш Chat ID?</h3>
-                    <ol class="login-section__instruction-list">
-                        <li>Откройте Telegram.</li>
-                        <li>Напишите команду <code>/start</code> боту <a href="https://t.me/life_tracker_app_bot" target="_blank">@life_tracker_app_bot</a>.</li>
-                        <li>Бот отправит вам ваш <strong>Chat ID</strong>.</li>
-                        <li>Используйте его для входа на сайт.</li>
-                    </ol>
-                </div>
+              <h2 class="login-section__title">Личный кабинет</h2>
+              <p class="login-section__subtitle">
+                Используйте Telegram для безопасной авторизации. После входа вы сможете управлять своими целями и дневником.
+              </p>
+          
+              <!-- Форма авторизации через deep linking -->
+              <div class="login-section__form-container">
+                <p>Для входа в систему нажмите кнопку ниже, чтобы авторизоваться через Telegram.</p>
+                <!-- Здесь ссылка deep linking. В реальном проекте значение параметра (например, auth_default) может генерироваться динамически сервером. -->
+                <a href="https://t.me/life_tracker_app_bot?start=auth_default" class="login-section__button">
+                  Войти через Telegram
+                </a>
+                <p id="loginMessage" class="login-section__message"></p>
+              </div>
+          
+              <!-- Инструкция -->
+              <div class="login-section__instruction">
+                <h3 class="login-section__instruction-title">Как работает авторизация?</h3>
+                <ol class="login-section__instruction-list">
+                  <li>Нажмите на кнопку "Войти через Telegram".</li>
+                  <li>Откроется чат с ботом <a href="https://t.me/life_tracker_app_bot" target="_blank">@life_tracker_app_bot</a>.</li>
+                  <li>Бот автоматически сгенерирует одноразовый код и отправит его вам.</li>
+                  <li>После этого код будет использован для авторизации на сайте, и вы попадете в личный кабинет.</li>
+                </ol>
+              </div>
             </div>
-        </section>
+          </section>
+          
         
     </main>
 
