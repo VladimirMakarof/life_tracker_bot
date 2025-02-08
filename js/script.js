@@ -102,26 +102,39 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	codeForm.addEventListener('submit', async (e) => {
-			e.preventDefault();
-			const chatId = document.getElementById('chatId').value;
-			const authCode = document.getElementById('authCode').value;
-
-			// Отправляем код на сервер
-			const verifyResponse = await fetch('/verify-login', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ chatId, code: authCode })
+		e.preventDefault();
+		const chatId = document.getElementById('chatId').value.trim();
+		const authCode = document.getElementById('authCode').value.trim();
+		if (!chatId || !authCode) {
+			loginMessage.textContent = "Введите ваш Chat ID и код.";
+			return;
+		}
+		
+		try {
+			const response = await fetch('/verify-deep-link', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ chatId, code: authCode })
 			});
-
-			const verifyData = await verifyResponse.json();
-			if (verifyData.success) {
-					loginMessage.textContent = 'Авторизация успешна!';
-					window.location.href = '/dashboard'; // Переход в ЛК
+			const data = await response.json();
+			if (data.success) {
+				// Вместо автоматического редиректа выводим сообщение с ссылкой
+				loginMessage.innerHTML = "Авторизация успешна! <a href='/dashboard'>Перейти в Личный Кабинет</a>";
 			} else {
-					loginMessage.textContent = 'Неверный код!';
+				loginMessage.textContent = data.error || "Ошибка авторизации.";
 			}
+		} catch (error) {
+			console.error("Ошибка при запросе /verify-deep-link:", error);
+			loginMessage.textContent = "Ошибка сети или сервера.";
+		}
 	});
 
+	if (data.success) {
+		document.getElementById('loginSuccess').style.display = 'block';
+		loginMessage.textContent = ""; 
+	}
+	
+	
 
 	
 		
