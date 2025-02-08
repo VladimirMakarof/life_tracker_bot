@@ -152,3 +152,70 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   fetchUserData();
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  const codeForm = document.getElementById('codeForm');
+  const loginMessage = document.getElementById('loginMessage');
+
+  // Обработка отправки формы с Chat ID
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const chatId = document.getElementById('chatId').value.trim();
+    if (!chatId) {
+      loginMessage.textContent = "Пожалуйста, введите ваш Chat ID.";
+      return;
+    }
+    
+    try {
+      const response = await fetch('/request-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId })
+      });
+      const data = await response.json();
+      if (data.success) {
+        loginMessage.textContent = "Код отправлен в Telegram. Проверьте ваш чат.";
+        // Скрываем форму ввода Chat ID и показываем форму ввода кода
+        loginForm.classList.add('login-section__form--hidden');
+        codeForm.classList.remove('login-section__form--hidden');
+      } else {
+        loginMessage.textContent = data.error || "Ошибка при отправке кода.";
+      }
+    } catch (error) {
+      console.error("Ошибка при запросе /request-login:", error);
+      loginMessage.textContent = "Ошибка сети или сервера.";
+    }
+  });
+
+  // Обработка отправки формы с кодом авторизации
+  codeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const chatId = document.getElementById('chatId').value.trim();
+    const authCode = document.getElementById('authCode').value.trim();
+    if (!chatId || !authCode) {
+      loginMessage.textContent = "Введите ваш Chat ID и код.";
+      return;
+    }
+    
+    try {
+      const response = await fetch('/verify-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId, code: authCode })
+      });
+      const data = await response.json();
+      if (data.success) {
+        loginMessage.textContent = "Авторизация успешна!";
+        // Перенаправляем пользователя на страницу личного кабинета
+        window.location.href = '/dashboard';
+      } else {
+        loginMessage.textContent = data.error || "Ошибка авторизации.";
+      }
+    } catch (error) {
+      console.error("Ошибка при запросе /verify-login:", error);
+      loginMessage.textContent = "Ошибка сети или сервера.";
+    }
+  });
+});
