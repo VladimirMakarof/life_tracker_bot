@@ -132,7 +132,7 @@ db.prepare(`
   ON settings(user_id, key)
 `).run();
  const bot = new TelegramBot(BOT_TOKEN, {webHook: {port: 3000}});
-// const bot = new TelegramBot(BOT_TOKEN);
+// const bot = new TelegramBot(BOT_TOKEN); 
 // bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET });
 
 bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET })
