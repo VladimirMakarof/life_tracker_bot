@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+	const loginForm = document.getElementById('loginForm');
+	const codeForm = document.getElementById('codeForm');
+	const loginMessage = document.getElementById('loginMessage');
 	// Бургер-меню
 	const burgerMenu = document.querySelector('.burger-menu');
 	const navLinks = document.querySelector('.nav-links');
@@ -74,9 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	lazyImages.forEach(img => {
 			observer.observe(img);
 	});
-	const loginForm = document.getElementById('loginForm');
-	const codeForm = document.getElementById('codeForm');
-	const loginMessage = document.getElementById('loginMessage');
+
 
 	loginForm.addEventListener('submit', async (e) => {
 			e.preventDefault();
@@ -119,6 +121,56 @@ document.addEventListener('DOMContentLoaded', () => {
 					loginMessage.textContent = 'Неверный код!';
 			}
 	});
+
+
+	
+		
+	
+		// Обработка отправки формы с Chat ID (если требуется)
+		loginForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const chatId = document.getElementById('chatId').value.trim();
+			if (!chatId) {
+				loginMessage.textContent = "Пожалуйста, введите ваш Chat ID.";
+				return;
+			}
+			
+			// Здесь можно отправить запрос, если хотите инициировать отправку кода через API
+			// Но в deep linking код отправляется автоматически ботом при команде /start.
+			loginMessage.textContent = "Пожалуйста, перейдите по ссылке для авторизации через Telegram.";
+		});
+	
+		// Обработка отправки формы с кодом авторизации
+		codeForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const chatId = document.getElementById('chatId').value.trim();
+			const authCode = document.getElementById('authCode').value.trim();
+			if (!chatId || !authCode) {
+				loginMessage.textContent = "Введите ваш Chat ID и код.";
+				return;
+			}
+			
+			try {
+				const response = await fetch('/verify-deep-link', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ chatId, code: authCode })
+				});
+				const data = await response.json();
+				if (data.success) {
+					loginMessage.textContent = "Авторизация успешна!";
+					// Перенаправляем пользователя, например, на личный кабинет
+					window.location.href = '/dashboard';
+				} else {
+					loginMessage.textContent = data.error || "Ошибка авторизации.";
+				}
+			} catch (error) {
+				console.error("Ошибка при запросе /verify-deep-link:", error);
+				loginMessage.textContent = "Ошибка сети или сервера.";
+			}
+		});
+
+	
 
 	// Обновление профиля пользователя
 // app.put('/api/user', authenticateToken, (req, res) => {
