@@ -199,16 +199,16 @@ app.post('/github-webhook', async (req, res) => {
 // -------------------------
 // Обработка Telegram вебхука
 // -------------------------
-app.post(`/bot${BOT_TOKEN}`, (req, res) => {
-  try {
-    // Передаём обновление библиотеке для дальнейшей обработки
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
-  } catch (error) {
-    console.error('Ошибка при обработке обновления Telegram:', error);
-    res.sendStatus(500);
-  }
-});
+// app.post(`/bot${BOT_TOKEN}`, (req, res) => {
+//   try {
+//     // Передаём обновление библиотеке для дальнейшей обработки
+//     bot.processUpdate(req.body);
+//     res.sendStatus(200);
+//   } catch (error) {
+//     console.error('Ошибка при обработке обновления Telegram:', error);
+//     res.sendStatus(500);
+//   }
+// });
 
 
 // Функция установки вебхука для Telegram
