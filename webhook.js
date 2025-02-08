@@ -131,8 +131,8 @@ db.prepare(`
   CREATE INDEX IF NOT EXISTS idx_settings_user_key 
   ON settings(user_id, key)
 `).run();
- const bot = new TelegramBot(BOT_TOKEN, {webHook: {port: 3000}});
-// const bot = new TelegramBot(BOT_TOKEN); 
+//  const bot = new TelegramBot(BOT_TOKEN, {webHook: {port: 3000}});
+const bot = new TelegramBot(BOT_TOKEN);
 // bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET });
 
 bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET })
@@ -199,35 +199,37 @@ app.post('/github-webhook', async (req, res) => {
 // -------------------------
 // Обработка Telegram вебхука
 // -------------------------
-// app.post(`/bot${BOT_TOKEN}`, (req, res) => {
-//   try {
-//     // Передаём обновление библиотеке для дальнейшей обработки
-//     bot.processUpdate(req.body);
-//     res.sendStatus(200);
-//   } catch (error) {
-//     console.error('Ошибка при обработке обновления Telegram:', error);
-//     res.sendStatus(500);
-//   }
-// });
+app.post(`/bot${BOT_TOKEN}`, (req, res) => {
+  try {
+    // Логируем обновление (для отладки, можно убрать)
+    console.log('Получено обновление от Telegram:', req.body);
+    // Передаём обновление в библиотеку для обработки соответствующими обработчиками
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Ошибка при обработке обновления Telegram:', error);
+    res.sendStatus(500);
+  }
+});
 
 
 // Функция установки вебхука для Telegram
-async function setTelegramWebhook() {
-  try {
-    const response = await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
-      url: `${url}/bot${BOT_TOKEN}`,
-      secret_token: SECRET,
-    });
-    if (response.data.ok) {
-      console.log('✅ Вебхук для Telegram установлен успешно');
-    } else {
-      console.error('❌ Ошибка при установке вебхука для Telegram:', response.data);
-    }
-  } catch (error) {
-    console.error('❌ Ошибка при установке вебхука для Telegram:', error);
-  }
-}
-setTelegramWebhook();
+// async function setTelegramWebhook() {
+//   try {
+//     const response = await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
+//       url: `${url}/bot${BOT_TOKEN}`,
+//       secret_token: SECRET,
+//     });
+//     if (response.data.ok) {
+//       console.log('✅ Вебхук для Telegram установлен успешно');
+//     } else {
+//       console.error('❌ Ошибка при установке вебхука для Telegram:', response.data);
+//     }
+//   } catch (error) {
+//     console.error('❌ Ошибка при установке вебхука для Telegram:', error);
+//   }
+// }
+// setTelegramWebhook();
 
 // -------------------------
 // Серверная логика: API, авторизация и личный кабинет
