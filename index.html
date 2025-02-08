@@ -129,11 +129,17 @@
                 Используйте Telegram для безопасной авторизации. Нажмите кнопку ниже, чтобы авторизоваться.
               </p>
           
-              <!-- Форма авторизации через deep linking -->
+              <!-- Блок авторизации через Telegram Login Widget -->
               <div class="login-section__form-container">
-                <a href="https://t.me/life_tracker_app_bot?start=auth_default" class="login-section__button">
-                  Войти через Telegram
-                </a>
+                <!-- Telegram Login Widget -->
+                <script async src="https://telegram.org/js/telegram-widget.js?15"
+                        data-telegram-login="life_tracker_app_bot"
+                        data-size="large"
+                        data-userpic="false"
+                        data-request-access="write"
+                        data-callback="onTelegramAuth">
+                </script>
+                <!-- Сообщение для пользователя -->
                 <p id="loginMessage" class="login-section__message"></p>
               </div>
           
@@ -141,13 +147,14 @@
               <div class="login-section__instruction">
                 <h3 class="login-section__instruction-title">Как это работает?</h3>
                 <ol class="login-section__instruction-list">
-                  <li>Нажмите на кнопку "Войти через Telegram".</li>
-                  <li>Откроется чат с ботом, и он автоматически отправит вам одноразовый код.</li>
-                  <li>Используйте полученный код для входа на сайте (это произойдет автоматически).</li>
+                  <li>Нажмите на кнопку авторизации через Telegram.</li>
+                  <li>После нажатия бот автоматически проверит данные и отправит вам подтверждение авторизации.</li>
+                  <li>Если авторизация успешна, вы будете перенаправлены в Личный Кабинет.</li>
                 </ol>
               </div>
             </div>
           </section>
+          
           
           
           

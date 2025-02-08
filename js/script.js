@@ -129,59 +129,64 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
-	if (data.success) {
-		document.getElementById('loginSuccess').style.display = 'block';
-		loginMessage.textContent = ""; 
-	}
-	
-	
 
-	
+
 		
-	
-		// Обработка отправки формы с Chat ID (если требуется)
-		loginForm.addEventListener('submit', async (e) => {
-			e.preventDefault();
-			const chatId = document.getElementById('chatId').value.trim();
-			if (!chatId) {
-				loginMessage.textContent = "Пожалуйста, введите ваш Chat ID.";
-				return;
-			}
-			
-			// Здесь можно отправить запрос, если хотите инициировать отправку кода через API
-			// Но в deep linking код отправляется автоматически ботом при команде /start.
-			loginMessage.textContent = "Пожалуйста, перейдите по ссылке для авторизации через Telegram.";
-		});
-	
-		// Обработка отправки формы с кодом авторизации
-		codeForm.addEventListener('submit', async (e) => {
-			e.preventDefault();
-			const chatId = document.getElementById('chatId').value.trim();
-			const authCode = document.getElementById('authCode').value.trim();
-			if (!chatId || !authCode) {
-				loginMessage.textContent = "Введите ваш Chat ID и код.";
-				return;
-			}
-			
-			try {
-				const response = await fetch('/verify-deep-link', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ chatId, code: authCode })
-				});
-				const data = await response.json();
-				if (data.success) {
-					loginMessage.textContent = "Авторизация успешна!";
-					// Перенаправляем пользователя, например, на личный кабинет
-					window.location.href = '/dashboard';
-				} else {
-					loginMessage.textContent = data.error || "Ошибка авторизации.";
-				}
-			} catch (error) {
-				console.error("Ошибка при запросе /verify-deep-link:", error);
-				loginMessage.textContent = "Ошибка сети или сервера.";
-			}
-		});
+// Эта функция будет вызвана автоматически после авторизации через Telegram Login Widget
+function onTelegramAuth(user) {
+  console.log("Пользователь авторизовался через Telegram:", user);
+  // Отправляем данные пользователя на сервер для проверки подписи и создания сессии
+  fetch('/telegram-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(user)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Если авторизация прошла успешно, перенаправляем пользователя в личный кабинет
+      window.location.href = '/dashboard';
+    } else {
+      // Если возникла ошибка, выводим сообщение
+      document.getElementById('loginMessage').textContent = "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+    }
+  })
+  .catch(error => {
+    console.error("Ошибка:", error);
+    document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
+  });
+}
+
+// Другой код (например, для меню, прокрутки, аккордеона и т.д.)
+document.addEventListener('DOMContentLoaded', () => {
+  // Пример: бургер-меню, плавная прокрутка, аккордеон, ленивая загрузка изображений
+  const burgerMenu = document.querySelector('.burger-menu');
+  const navLinks = document.querySelector('.nav-links');
+  
+  burgerMenu.addEventListener('click', () => {
+    navLinks.classList.toggle('show');
+    burgerMenu.classList.toggle('active');
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+      if (window.innerWidth <= 768) {
+        navLinks.classList.remove('show');
+        burgerMenu.classList.remove('active');
+      }
+    });
+  });
+
+  // Другой вспомогательный функционал (аккордеон, ленивые изображения и т.д.)
+});
 
 	
 
