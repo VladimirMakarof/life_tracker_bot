@@ -382,33 +382,21 @@ bot.onText(/\/test/, (msg) => {
   bot.sendMessage(msg.chat.id, 'Бот работает!');
 });
 
-// Глобальное хранилище для одноразовых кодов (в продакшене лучше использовать базу данных или Redis)
-const authCodes = {};
-
-bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
+bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  const deepLinkParam = match[1]; // может быть undefined
 
-  // Если deep linking инициирован, выполняем именно эту логику
-  if (deepLinkParam && deepLinkParam.startsWith('auth_')) {
-    const oneTimeCode = Math.floor(100000 + Math.random() * 900000).toString();
-    authCodes[chatId] = {
-      code: oneTimeCode,
-      session: deepLinkParam,  // можно сохранить идентификатор сессии, если требуется
-      expires: Date.now() + 5 * 60 * 1000 // код действителен 5 минут
-    };
-    bot.sendMessage(chatId, `Для завершения авторизации используйте следующий одноразовый код (действителен 5 минут): ${oneTimeCode}`);
-    return; // не выполняем дальнейшую логику 
-  }
-
-  // Если deep linking не используется – обычная логика /start
+  // Выполняем обычную логику /start без обработки параметров deep linking
   let user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
   if (!user) {
     // Регистрация нового пользователя
     db.prepare(`
       INSERT INTO users (chat_id, username, language)
       VALUES (?, ?, ?)
-    `).run(chatId, msg.from.username || 'unknown', (msg.from.language_code && msg.from.language_code.startsWith('ru')) ? 'ru' : 'en');
+    `).run(
+      chatId,
+      msg.from.username || 'unknown',
+      (msg.from.language_code && msg.from.language_code.startsWith('ru')) ? 'ru' : 'en'
+    );
     user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
     userStates[chatId] = { step: 'ask_name' };
     bot.sendMessage(chatId, 'Привет! Как тебя зовут?');
@@ -416,6 +404,7 @@ bot.onText(/\/start(?:\s+(.+))?/, (msg, match) => {
     bot.sendMessage(chatId, 'С возвращением!');
   }
 });
+
 
 
 
