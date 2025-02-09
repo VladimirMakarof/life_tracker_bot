@@ -221,12 +221,11 @@ app.post('/telegram-auth', (req, res) => {
     return res.json({ success: false, error: "Неверные данные" });
   }
 
-  // Считаем, что telegramUser.id — это уникальный идентификатор в Telegram
   const chatId = String(telegramUser.id);
   let user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
 
-  // Если пользователя нет — создаем
   if (!user) {
+    // Создаём запись
     try {
       db.prepare(`
         INSERT INTO users (chat_id, username, name) 
@@ -243,21 +242,11 @@ app.post('/telegram-auth', (req, res) => {
     }
   }
 
-  // Теперь у нас точно есть user (либо только что создали, либо был)
-  // Генерируем JWT-токен (как в /verify-login)
-  const token = jwt.sign({ chatId }, SECRET_KEY, { 
-    expiresIn: process.env.JWT_EXPIRATION || '7d' 
-  });
+  // Генерируем JWT
+  const token = jwt.sign({ chatId }, SECRET_KEY, { expiresIn: '7d' });
 
-  // Устанавливаем cookie с токеном
-  res.cookie('auth_token', token, { 
-    httpOnly: true, 
-    secure: true, 
-    sameSite: 'Strict' 
-  });
-
-  // Возвращаем успешный ответ, фронтенд сделает window.location.href = '/dashboard'
-  res.json({ success: true });
+  // Возвращаем токен в JSON (НЕ ставим cookie!)
+  res.json({ success: true, token });
 });
 
 
@@ -310,60 +299,29 @@ app.post('/verify-deep-link', (req, res) => {
 });
 
 
-// app.post('/verify-login', (req, res) => {
-//   try {
-//     const { chatId, code } = req.body;
-//     if (!chatId || !code) {
-//       return res.status(400).json({ success: false, error: '❌ Chat ID и код обязательны.' });
-//     }
-//     const record = db.prepare('SELECT * FROM login_codes WHERE chat_id = ?').get(chatId);
-//     if (!record || record.code !== code || new Date(record.expires_at) < new Date()) {
-//       return res.status(400).json({ success: false, error: '❌ Неверный или просроченный код' });
-//     }
-//     db.prepare('DELETE FROM login_codes WHERE chat_id = ?').run(chatId);
-//     const token = jwt.sign({ chatId }, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRATION || '7d' });
-//     res.cookie('auth_token', token, { httpOnly: true, secure: true, sameSite: 'Strict' });
-//     res.json({ success: true, message: '✅ Авторизация успешна!', token });
-//   } catch (error) {
-//     console.error('❌ Ошибка при обработке запроса /verify-login:', error);
-//     res.status(500).json({ success: false, error: '❌ Внутренняя ошибка сервера.' });
-//   }
-// });
-
 // Middleware для проверки JWT
-const authenticateToken = (req, res, next) => {
-  const token = req.cookies.auth_token;
-  if (!token) {
-    // Перенаправляем на главную страницу с сообщением (передаём сообщение через query-параметр)
-    return res.redirect('/?error=Пожалуйста, авторизуйтесь');
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers.authorization; // "Bearer xxx"
+  if (!authHeader) {
+    return res.status(401).json({ success: false, error: 'Токен не найден' });
   }
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
-    if (err) {
-      // Перенаправляем, если токен не прошёл проверку
-      return res.redirect('/?error=Пожалуйста, авторизуйтесь');
-    }
-    req.user = decoded;
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Неверный заголовок Authorization' });
+  }
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded; // { chatId: ... }
     next();
-  });
-};
+  } catch (err) {
+    return res.status(403).json({ success: false, error: 'Токен недействителен или просрочен' });
+  }
+}
 
 
 
 app.get('/dashboard', (req, res) => {
-  // 1. Проверяем cookie
-  const token = req.cookies.auth_token;
-  if (!token) {
-    return res.redirect('/?error=' + encodeURIComponent('Пожалуйста, авторизуйтесь'));
-  }
-  // 2. Верифицируем JWT
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
-    if (err) {
-      return res.redirect('/?error=' + encodeURIComponent('Неверный или просроченный токен'));
-    }
-    // 3. Если всё ок — decoded содержит { chatId: ... }
-    // Отдаём HTML страницы личного кабинета
-    return res.sendFile(path.join(__dirname, 'pages', 'dashboard.html'));
-  });
+  return res.sendFile(path.join(__dirname, 'pages', 'dashboard.html'));
 });
 
 
@@ -382,7 +340,7 @@ app.get('/api/user', authenticateToken, (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('auth_token');
+  // res.clearCookie('auth_token');
   res.json({ success: true, message: '✅ Вы вышли из системы' });
 });
 

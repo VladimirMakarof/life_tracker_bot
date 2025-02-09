@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет - Life Tracker Bot</title>
+    <!-- Подключаем иконки и стили -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="icon" href="../img/favicon.svg" type="image/svg+xml">
@@ -27,36 +28,15 @@
     </header>
 
     <main>
-        <!-- <section id="profile">
-            <div class="section-inner">
-                <h2>👤 Ваш профиль</h2>
-                <p id="userInfo">Загрузка данных...</p>
-            </div>
-        </section>
-
-        <section id="goals">
-            <div class="section-inner">
-                <h2>🎯 Ваши цели</h2>
-                <ul id="goalList">
-                    <li>Загрузка данных...</li>
-                </ul>
-                <button id="addGoalBtn">Добавить цель</button>
-            </div>
-        </section>
-
-        <section id="diary">
-            <div class="section-inner">
-                <h2>📖 Дневник</h2>
-                <textarea id="diaryEntry" placeholder="Введите заметку..."></textarea>
-                <button id="saveDiary">Сохранить</button>
-                <ul id="diaryList"></ul>
-            </div>
-        </section> -->
-
+        <!-- 
+          Вы можете раскомментировать/дополнить блоки "Цели", "Дневник" и т.д.,
+          если они тоже нужны.
+        -->
 
         <section id="profile" class="profile-section">
             <div class="profile-section__inner">
               <h2 class="profile-section__title">Ваш профиль</h2>
+              <!-- Форма для редактирования данных пользователя -->
               <form id="profileForm" class="profile-section__form">
                 <label for="name" class="profile-section__label">Имя:</label>
                 <input type="text" id="name" required class="profile-section__input">
@@ -81,7 +61,11 @@
           
                 <button type="submit" class="profile-section__button">Сохранить изменения</button>
               </form>
+
+              <!-- Сообщения/ошибки при обновлении профиля -->
               <p id="profileInfo" class="profile-section__message"></p>
+
+              <!-- Кнопка удаления аккаунта -->
               <button id="deleteAccountBtn" class="profile-section__delete-btn">Удалить аккаунт</button>
             </div>
           </section>
@@ -94,6 +78,48 @@
         </div>
     </footer>
 
+    <!-- Основной скрипт для функционала дашборда -->
+    <script>
+      // При загрузке страницы автоматически запрашиваем данные пользователя
+      document.addEventListener('DOMContentLoaded', async () => {
+        // 1) Проверяем наличие токена
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          // Нет токена => не авторизован
+          window.location.href = '/?error=' + encodeURIComponent('Пожалуйста, авторизуйтесь');
+          return;
+        }
+
+        try {
+          // 2) Запрашиваем профиль пользователя
+          const response = await fetch('/api/user', {
+            headers: {
+              'Authorization': 'Bearer ' + token
+            }
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            // У нас есть объект data.user
+            // Заполним поля формы
+            document.getElementById('name').value = data.user.name || '';
+            document.getElementById('birthdate').value = data.user.birthdate || '';
+            document.getElementById('target_age').value = data.user.target_age || '';
+            document.getElementById('language').value = data.user.language || 'en';
+            document.getElementById('morning_time').value = data.user.morning_time || '08:00';
+            document.getElementById('evening_time').value = data.user.evening_time || '20:00';
+          } else {
+            // Токен просрочен / неверный
+            window.location.href = '/?error=' + encodeURIComponent(data.error || 'Ошибка авторизации');
+          }
+        } catch (error) {
+          console.error('Ошибка при получении профиля:', error);
+          window.location.href = '/?error=Сетевая ошибка или сервер недоступен';
+        }
+      });
+    </script>
+
+    <!-- Подключаем ваш dashboard.js (если он нужен) -->
     <script src="../js/dashboard.js"></script>
 </body>
 </html>

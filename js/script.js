@@ -55,26 +55,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Вызываем обновление UI при загрузке страницы
   updateAuthUI();
-
-  // Глобальная функция для обратного вызова авторизации через Telegram.
-  // Её вызовет Telegram Login Widget.
 	window.onTelegramAuth = function(user) {
 		console.log("Пользователь авторизовался через Telegram:", user);
+	
 		fetch('/telegram-auth', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			credentials: 'include', 
+			// Передаём user, а не userFromTelegram
 			body: JSON.stringify(user)
 		})
 		.then(response => response.json())
 		.then(data => {
 			console.log("Ответ от /telegram-auth:", data);
 			if (data.success) {
-				// Сохраняем флаг авторизации и имя пользователя (если нужно)
+				// Сохраняем токен
+				localStorage.setItem('auth_token', data.token);
+	
+				// Флаг, что мы авторизованы
 				localStorage.setItem('isAuthenticated', 'true');
+				// Если хотим сохранить имя пользователя
 				localStorage.setItem('userName', user.first_name);
+	
+				// Обновляем UI (например, чтобы скрыть кнопку авторизации)
 				updateAuthUI();
-				// Автоматически перенаправляем пользователя в личный кабинет
+	
+				// Переходим в личный кабинет
 				window.location.href = '/dashboard';
 			} else {
 				document.getElementById('loginMessage').textContent =
@@ -83,10 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		})
 		.catch(error => {
 			console.error("Ошибка при запросе /telegram-auth:", error);
-			document.getElementById('loginMessage').textContent =
-				"Ошибка сети или сервера.";
+			document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
 		});
 	};
+	
 	
 
   // Обработчик для кнопки "Выйти"
