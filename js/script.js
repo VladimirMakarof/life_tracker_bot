@@ -32,15 +32,30 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 	});
 
-	const logoutBtn = document.getElementById('logoutBtn');
+	function checkAuth() {
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    const logoutContainer = document.getElementById('logoutContainer');
+    if (isAuthenticated === 'true') {
+      logoutContainer.classList.remove('hidden');
+    } else {
+      logoutContainer.classList.add('hidden');
+    }
+  }
+
+  // Вызываем проверку авторизации при загрузке страницы
+  checkAuth();
+
+  // Обработчик для кнопки "Выйти"
+  const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
+    logoutBtn.addEventListener('click', async () => {
       try {
         const response = await fetch('/logout', { method: 'POST' });
         const data = await response.json();
         if (data.success) {
-          // После успешного выхода перенаправляем пользователя на страницу авторизации
+          // Убираем флаг авторизации
+          localStorage.removeItem('isAuthenticated');
+          // Перенаправляем пользователя на страницу авторизации или главную страницу
           window.location.href = '/login';
         } else {
           alert('Ошибка выхода: ' + (data.error || 'неизвестная ошибка'));
