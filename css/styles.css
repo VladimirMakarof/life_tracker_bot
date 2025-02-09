@@ -433,3 +433,76 @@ footer {
 .hidden {
   display: none;
 }
+
+/* CSS */
+
+/* Основной блок отзыва */
+.testimonial-card {
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Особенные стили для карточки */
+.special-card {
+  border: 2px solid #4a90e2;
+  transition: transform 0.3s ease;
+}
+
+.special-card:hover {
+  transform: scale(1.03);
+}
+
+/* Стили для изображения пользователя */
+.testimonial-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Особенные стили для изображения */
+.special-img {
+  border-color: #4a90e2;
+}
+
+/* Стили для цитаты */
+.testimonial-quote p {
+  font-style: italic;
+  color: #333;
+  margin: 15px 0;
+  line-height: 1.5;
+}
+
+/* Особенные стили для цитаты */
+.special-quote p {
+  position: relative;
+  padding-left: 20px;
+}
+
+.special-quote p::before {
+  content: "“";
+  font-size: 30px;
+  position: absolute;
+  left: 0;
+  top: -10px;
+  color: #4a90e2;
+}
+
+/* Стили для подписи автора */
+.testimonial-author {
+  font-weight: bold;
+  color: #555;
+}
+
+/* Особенные стили для подписи */
+.special-author {
+  font-size: 0.9em;
+  letter-spacing: 0.5px;
+}
