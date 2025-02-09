@@ -270,7 +270,7 @@ app.post('/verify-deep-link', (req, res) => {
   if (record && record.code === code && Date.now() < record.expires) {
     // Код корректный — авторизация успешна.
     // Здесь можно, например, создать сессию для пользователя, сгенерировать JWT-токен и т.д.
-    // После успешной проверки можно удалить одноразовый код
+    // После успешной проверки можно удалить одноразовый код 
     delete authCodes[chatId];
     return res.json({ success: true, message: 'Авторизация успешна', chatId });
   } else {
