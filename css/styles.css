@@ -377,6 +377,9 @@ footer {
   font-size: 1rem;
   color: var(--text-color);
 }
+error-message {
+	color: red;
+}
 
 /* Стили для блока инструкции */
 .login-section__instruction {
