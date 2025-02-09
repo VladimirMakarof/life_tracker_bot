@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		fetch('/telegram-auth', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			credentials: 'include', // <--- добавьте эту строку
+			credentials: 'include', 
 			body: JSON.stringify(user)
 		})
 		.then(response => response.json())
