@@ -160,51 +160,67 @@
 					<p class="login-section__subtitle">
 						Авторизуйтесь через Telegram для доступа к личному кабинету.
 					</p>
-
+			
 					<!-- Блок авторизации через Telegram Login Widget -->
 					<div class="login-section__form-container">
-                        <!-- Telegram Login Widget: виджет автоматически отобразит кнопку авторизации   -->
-                        <script async src="https://telegram.org/js/telegram-widget.js?22"
-                                data-telegram-login="life_tracker_app_bot"
-                                data-size="large"
-                                data-callback="onTelegramAuth"
-                                data-request-access="write">
-                        </script>
-                        <script type="text/javascript">
-                          function onTelegramAuth(user) {
-                            alert(
-                              'Logged in as ' +
-                              user.first_name +
-                              ' ' +
-                              user.last_name +
-                              ' (' +
-                              user.id +
-                              (user.username ? ', @' + user.username : '') +
-                              ')'
-                            );
-                            // Здесь можно добавить дополнительную логику, например, отправку данных на сервер   
-                          }
-                        </script>
-                        <p id="loginMessage" class="login-section__message"></p>
-												<button id="logoutBtn" class="logout-btn">Выйти</button>
-                    </div>                      
-
+						<!-- Telegram Login Widget: виджет автоматически отобразит кнопку авторизации -->
+						<script async src="https://telegram.org/js/telegram-widget.js?22"
+										data-telegram-login="life_tracker_app_bot"
+										data-size="large"
+										data-callback="onTelegramAuth"
+										data-request-access="write">
+						</script>
+						<script type="text/javascript">
+							function onTelegramAuth(user) {
+								console.log("Пользователь авторизовался через Telegram:", user);
+								// Отправляем данные пользователя на сервер (при необходимости)
+								fetch('/telegram-auth', {
+									method: 'POST',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify(user)
+								})
+								.then(response => response.json())
+								.then(data => {
+									if (data.success) {
+										// Сохраняем флаг авторизации (для демонстрации)
+										localStorage.setItem('isAuthenticated', 'true');
+										// Показываем кнопку "Выйти"
+										document.getElementById('logoutContainer').classList.remove('hidden');
+										// Переходим в личный кабинет (или выполняем другую логику)
+										window.location.href = '/dashboard';
+									} else {
+										document.getElementById('loginMessage').textContent =
+											"Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+									}
+								})
+								.catch(error => {
+									console.error("Ошибка при авторизации:", error);
+									document.getElementById('loginMessage').textContent =
+										"Ошибка сети или сервера.";
+								});
+							}
+						</script>
+			
+						<p id="loginMessage" class="login-section__message"></p>
+						
+						<!-- Контейнер для кнопки выхода (скрыт по умолчанию) -->
+						<div id="logoutContainer" class="hidden">
+							<button id="logoutBtn" class="logout-btn">Выйти</button>
+						</div>
+					</div>
+			
 					<!-- Инструкция -->
 					<div class="login-section__instruction">
 						<h3 class="login-section__instruction-title">Как это работает?</h3>
 						<ol class="login-section__instruction-list">
 							<li>Нажмите на кнопку авторизации через Telegram.</li>
-							<li>
-								Виджет автоматически передаст данные вашего аккаунта вашему
-								серверу.
-							</li>
+							<li>Виджет автоматически передаст данные вашего аккаунта вашему серверу.</li>
 							<li>После успешной проверки вы попадёте в личный кабинет.</li>
 						</ol>
 					</div>
-					
-
 				</div>
 			</section>
+			
 		</main>
 
 		<div class="floating-telegram">
