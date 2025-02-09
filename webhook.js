@@ -214,14 +214,52 @@ app.post(`/bot${BOT_TOKEN}`, (req, res) => {
 });
 
 app.post('/telegram-auth', (req, res) => {
-  console.log("Получен запрос на /telegram-auth:", req.body);
-  const user = req.body;
-  if (user && user.id) {
-    res.json({ success: true });
-  } else {
-    res.json({ success: false, error: "Неверные данные" });
+  const telegramUser = req.body;
+  console.log("Пользователь авторизовался через Telegram:", telegramUser);
+
+  if (!telegramUser || !telegramUser.id) {
+    return res.json({ success: false, error: "Неверные данные" });
   }
+
+  // Считаем, что telegramUser.id — это уникальный идентификатор в Telegram
+  const chatId = String(telegramUser.id);
+  let user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+
+  // Если пользователя нет — создаем
+  if (!user) {
+    try {
+      db.prepare(`
+        INSERT INTO users (chat_id, username, name) 
+        VALUES (?, ?, ?)
+      `).run(
+        chatId, 
+        telegramUser.username || '', 
+        telegramUser.first_name || ''
+      );
+      user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+    } catch (err) {
+      console.error("Ошибка при создании пользователя:", err);
+      return res.json({ success: false, error: "Ошибка при создании пользователя" });
+    }
+  }
+
+  // Теперь у нас точно есть user (либо только что создали, либо был)
+  // Генерируем JWT-токен (как в /verify-login)
+  const token = jwt.sign({ chatId }, SECRET_KEY, { 
+    expiresIn: process.env.JWT_EXPIRATION || '7d' 
+  });
+
+  // Устанавливаем cookie с токеном
+  res.cookie('auth_token', token, { 
+    httpOnly: true, 
+    secure: true, 
+    sameSite: 'Strict' 
+  });
+
+  // Возвращаем успешный ответ, фронтенд сделает window.location.href = '/dashboard'
+  res.json({ success: true });
 });
+
 
 
 

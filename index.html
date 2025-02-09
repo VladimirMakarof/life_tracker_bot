@@ -180,10 +180,8 @@
 										data-callback="onTelegramAuth"
 										data-request-access="write">
 						</script>
-						<script type="text/javascript">
+						<script>
 							function onTelegramAuth(user) {
-								console.log("Пользователь авторизовался через Telegram:", user);
-								// Отправляем данные пользователя на сервер (при необходимости)
 								fetch('/telegram-auth', {
 									method: 'POST',
 									headers: { 'Content-Type': 'application/json' },
@@ -192,11 +190,8 @@
 								.then(response => response.json())
 								.then(data => {
 									if (data.success) {
-										// Сохраняем флаг авторизации 
 										localStorage.setItem('isAuthenticated', 'true');
-										// Показываем кнопку "Выйти"
-										document.getElementById('logoutContainer').classList.remove('hidden');
-										// Переходим в личный кабинет (или выполняем другую логику)
+										// Переходим в личный кабинет
 										window.location.href = '/dashboard';
 									} else {
 										document.getElementById('loginMessage').textContent =
@@ -205,8 +200,7 @@
 								})
 								.catch(error => {
 									console.error("Ошибка при авторизации:", error);
-									document.getElementById('loginMessage').textContent =
-										"Ошибка сети или сервера.";
+									document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
 								});
 							}
 						</script>
