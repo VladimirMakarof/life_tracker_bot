@@ -80,32 +80,37 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------
   // 4. Функция авторизации через Telegram Login Widget
   // ------------------------------
-  window.onTelegramAuth = function(user) {
-    console.log("Пользователь авторизовался через Telegram:", user);
-    fetch('/telegram-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Сохраняем флаг авторизации и имя пользователя
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('userName', user.first_name);
-          updateAuthUI();
-          // Автоматически перенаправляем пользователя в личный кабинет
-          window.location.href = '/dashboard';
-        } else {
-          document.getElementById('loginMessage').textContent =
-            "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
-        }
-      })
-      .catch(error => {
-        console.error("Ошибка при запросе /telegram-auth:", error);
-        document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
-      });
-  };
+	window.onTelegramAuth = function(user) {
+		console.log("Пользователь авторизовался через Telegram:", user);
+		// Отправляем данные пользователя на сервер для обработки
+		fetch('/telegram-auth', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(user)
+		})
+		.then(response => response.json())
+		.then(data => {
+			console.log("Ответ от /telegram-auth:", data);
+			if (data.success) {
+				// Сохраняем флаг авторизации и имя пользователя
+				localStorage.setItem('isAuthenticated', 'true');
+				localStorage.setItem('userName', user.first_name);
+				// Обновляем UI (например, скрываем виджет, показываем кнопку "Выйти")
+				updateAuthUI();
+				// Перенаправляем пользователя в личный кабинет
+				window.location.href = '/dashboard';
+			} else {
+				document.getElementById('loginMessage').textContent =
+					"Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+			}
+		})
+		.catch(error => {
+			console.error("Ошибка при запросе /telegram-auth:", error);
+			document.getElementById('loginMessage').textContent =
+				"Ошибка сети или сервера.";
+		});
+	};
+	
 
   // ------------------------------
   // 5. Обработка аккордеона и ленивой загрузки изображений
