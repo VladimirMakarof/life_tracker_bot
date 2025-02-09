@@ -1,39 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // ------------------------------
-  // 1. Инициализация базового UI: бургер-меню, плавная прокрутка
-  // ------------------------------
-  const burgerMenu = document.querySelector('.burger-menu');
-  const navLinks = document.querySelector('.nav-links');
-
-  if (burgerMenu) {
-    burgerMenu.addEventListener('click', () => {
-      navLinks.classList.toggle('show');
-      burgerMenu.classList.toggle('active');
-    });
-  }
-
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-      // Если экран мал, закрываем меню
-      if (window.innerWidth <= 768) {
-        navLinks.classList.remove('show');
-        burgerMenu.classList.remove('active');
-      }
-    });
-  });
-
-  // ------------------------------
-  // 2. Функция обновления UI в зависимости от состояния авторизации
-  // ------------------------------
+  // Функция обновления интерфейса в зависимости от авторизации
   function updateAuthUI() {
+    const authContainer = document.getElementById('authContainer'); // контейнер для информации "Войти как {Имя}"
+    const logoutContainer = document.getElementById('logoutContainer'); // контейнер для кнопки "Выйти"
     const isAuthenticated = localStorage.getItem('isAuthenticated');
-    const authContainer = document.getElementById('authContainer'); // если есть контейнер для информации о пользователе
-    const logoutContainer = document.getElementById('logoutContainer');
+    
     if (isAuthenticated === 'true') {
       const userName = localStorage.getItem('userName') || '';
       if (authContainer) {
@@ -52,9 +23,38 @@ document.addEventListener('DOMContentLoaded', () => {
   // Вызываем обновление UI при загрузке страницы
   updateAuthUI();
 
-  // ------------------------------
-  // 3. Обработчик для кнопки "Выйти"
-  // ------------------------------
+  // Глобальная функция для обратного вызова авторизации через Telegram.
+  // Её вызовет Telegram Login Widget.
+  window.onTelegramAuth = function(user) {
+    console.log("Пользователь авторизовался через Telegram:", user);
+    fetch('/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Ответ от /telegram-auth:", data);
+      if (data.success) {
+        // Сохраняем флаг авторизации и имя пользователя
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userName', user.first_name);
+        updateAuthUI();
+        // Автоматически перенаправляем пользователя в личный кабинет
+        window.location.href = '/dashboard';
+      } else {
+        document.getElementById('loginMessage').textContent =
+          "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+      }
+    })
+    .catch(error => {
+      console.error("Ошибка при запросе /telegram-auth:", error);
+      document.getElementById('loginMessage').textContent =
+        "Ошибка сети или сервера.";
+    });
+  };
+
+  // Обработчик для кнопки "Выйти"
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
@@ -62,10 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/logout', { method: 'POST' });
         const data = await response.json();
         if (data.success) {
+          // Сбрасываем флаги авторизации
           localStorage.removeItem('isAuthenticated');
           localStorage.removeItem('userName');
           updateAuthUI();
-          // Перенаправление (например, на страницу входа)
+          // Перенаправляем пользователя на страницу входа (или на главную)
           window.location.href = '/login';
         } else {
           alert('Ошибка выхода: ' + (data.error || 'неизвестная ошибка'));
@@ -77,44 +78,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ------------------------------
-  // 4. Функция авторизации через Telegram Login Widget
-  // ------------------------------
-	window.onTelegramAuth = function(user) {
-		console.log("Пользователь авторизовался через Telegram:", user);
-		// Отправляем данные пользователя на сервер для обработки
-		fetch('/telegram-auth', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(user)
-		})
-		.then(response => response.json())
-		.then(data => {
-			console.log("Ответ от /telegram-auth:", data);
-			if (data.success) {
-				// Сохраняем флаг авторизации и имя пользователя
-				localStorage.setItem('isAuthenticated', 'true');
-				localStorage.setItem('userName', user.first_name);
-				// Обновляем UI (например, скрываем виджет, показываем кнопку "Выйти")
-				updateAuthUI();
-				// Перенаправляем пользователя в личный кабинет
-				window.location.href = '/dashboard';
-			} else {
-				document.getElementById('loginMessage').textContent =
-					"Ошибка авторизации: " + (data.error || "неизвестная ошибка");
-			}
-		})
-		.catch(error => {
-			console.error("Ошибка при запросе /telegram-auth:", error);
-			document.getElementById('loginMessage').textContent =
-				"Ошибка сети или сервера.";
-		});
-	};
-	
+  // --- Функции для навигации и прочего UI ---
 
-  // ------------------------------
-  // 5. Обработка аккордеона и ленивой загрузки изображений
-  // ------------------------------
+  // Бургер-меню: открытие/закрытие меню
+  const burgerMenu = document.querySelector('.burger-menu');
+  const navLinks = document.querySelector('.nav-links');
+  if (burgerMenu && navLinks) {
+    burgerMenu.addEventListener('click', () => {
+      navLinks.classList.toggle('show');
+      burgerMenu.classList.toggle('active');
+    });
+  }
+
+  // Плавная прокрутка для якорных ссылок
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      // Если экран мал, закрываем меню
+      if (window.innerWidth <= 768 && navLinks && burgerMenu) {
+        navLinks.classList.remove('show');
+        burgerMenu.classList.remove('active');
+      }
+    });
+  });
+
+  // Функция для аккордеона
   const accordionItems = document.querySelectorAll('.accordion-item');
   accordionItems.forEach(item => {
     const header = item.querySelector('.accordion-header');
@@ -125,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Ленивое (lazy) загрузка изображений
   const lazyImages = document.querySelectorAll('img[loading="lazy"]');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -136,9 +129,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   lazyImages.forEach(img => observer.observe(img));
-
-  // ------------------------------
-  // 6. Дополнительный вспомогательный функционал (если требуется)
-  // ------------------------------
-  // Здесь можно добавить другие слушатели или функции
 });
