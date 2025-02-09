@@ -368,26 +368,24 @@ const authenticateToken = (req, res, next) => {
 };
 
 
-app.get('/dashboard', authenticateToken, (req, res) => {
-  res.json({ message: `👋 Добро пожаловать! Ваш Chat ID: ${req.user.chatId}` });
-});
-
-// Изменённая версия для редиректа при отсутствии авторизации
+// Убираем дубликат! Оставляем один “правильный”:
 app.get('/dashboard', (req, res) => {
+  // 1. Проверяем cookie
   const token = req.cookies.auth_token;
   if (!token) {
-    // Если cookie отсутствует, перенаправляем на главную с сообщением об ошибке
     return res.redirect('/?error=' + encodeURIComponent('Пожалуйста, авторизуйтесь'));
   }
+  // 2. Верифицируем JWT
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
-      // Если токен недействителен или просрочен, тоже перенаправляем с ошибкой
       return res.redirect('/?error=' + encodeURIComponent('Неверный или просроченный токен'));
     }
-    // Если токен действителен, отдаем HTML-страницу кабинета
-    res.sendFile(path.join(__dirname, 'pages', 'dashboard.html'));
+    // 3. Если всё ок — decoded содержит { chatId: ... }
+    // Отдаём HTML страницы личного кабинета
+    return res.sendFile(path.join(__dirname, 'pages', 'dashboard.html'));
   });
 });
+
 
 
 app.get('/api/user', authenticateToken, (req, res) => {
