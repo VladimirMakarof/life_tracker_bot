@@ -213,17 +213,15 @@ app.post(`/bot${BOT_TOKEN}`, (req, res) => {
 });
 
 app.post('/telegram-auth', (req, res) => {
-  // Пример: проверить данные пользователя, создать JWT-токен, установить cookie и вернуть success
-  
+  console.log("Получен запрос на /telegram-auth:", req.body);
   const user = req.body;
-  // Здесь должна быть проверка подписи и т.п.
   if (user && user.id) {
-    // Предположим, авторизация успешна:
     res.json({ success: true });
   } else {
     res.json({ success: false, error: "Неверные данные" });
   }
 });
+
 
 
 
