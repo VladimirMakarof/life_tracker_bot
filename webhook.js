@@ -333,6 +333,25 @@ app.get('/dashboard', authenticateToken, (req, res) => {
   res.json({ message: `👋 Добро пожаловать! Ваш Chat ID: ${req.user.chatId}` });
 });
 
+// Изменённая версия для редиректа при отсутствии авторизации
+app.get('/dashboard', (req, res) => {
+  const token = req.cookies.auth_token;
+  if (!token) {
+    // Если токена нет, перенаправляем на главную с параметром ошибки
+    return res.redirect('/?error=' + encodeURIComponent('Пожалуйста, авторизуйтесь'));
+  }
+  // Если токен есть, проверяем его
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) {
+      // Если токен недействителен, перенаправляем с ошибкой
+      return res.redirect('/?error=' + encodeURIComponent('Неверный или просроченный токен'));
+    }
+    // Если всё ок, отдаем страницу кабинета
+    res.json({ message: `👋 Добро пожаловать! Ваш Chat ID: ${decoded.chatId}` });
+  });
+});
+
+
 app.get('/api/user', authenticateToken, (req, res) => {
   try {
     const user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(req.user.chatId);
