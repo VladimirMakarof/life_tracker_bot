@@ -160,6 +160,17 @@
 					<p class="login-section__subtitle">
 						Авторизуйтесь через Telegram для доступа к личному кабинету.
 					</p>
+
+					    <!-- Блок уведомлений (сообщение об ошибке и т.д.) -->
+    <div id="notification">
+      <script>
+        const params = new URLSearchParams(window.location.search);
+        const errorMsg = params.get('error');
+        if (errorMsg) {
+          document.write(`<p class="error-message">${errorMsg}</p>`);
+        }
+      </script>
+    </div>
 			
 					<!-- Блок авторизации через Telegram Login Widget -->
 					<div class="login-section__form-container">

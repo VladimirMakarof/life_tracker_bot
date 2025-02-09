@@ -315,16 +315,19 @@ app.post('/verify-login', (req, res) => {
 const authenticateToken = (req, res, next) => {
   const token = req.cookies.auth_token;
   if (!token) {
-    return res.status(403).json({ success: false, error: '⚠ Необходима авторизация' });
+    // Перенаправляем на главную страницу с сообщением (передаём сообщение через query-параметр)
+    return res.redirect('/?error=Пожалуйста, авторизуйтесь');
   }
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ success: false, error: '❌ Неверный или просроченный токен' });
+      // Перенаправляем, если токен не прошёл проверку
+      return res.redirect('/?error=Пожалуйста, авторизуйтесь');
     }
     req.user = decoded;
     next();
   });
 };
+
 
 app.get('/dashboard', authenticateToken, (req, res) => {
   res.json({ message: `👋 Добро пожаловать! Ваш Chat ID: ${req.user.chatId}` });
