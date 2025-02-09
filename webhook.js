@@ -10,6 +10,7 @@ const axios = require('axios');
 const Database = require('better-sqlite3');
 const TelegramBot = require('node-telegram-bot-api');
 const schedule = require('node-schedule');
+const path = require('path');
 
 // Логгер 123444
 const logger = {
@@ -337,17 +338,16 @@ app.get('/dashboard', authenticateToken, (req, res) => {
 app.get('/dashboard', (req, res) => {
   const token = req.cookies.auth_token;
   if (!token) {
-    // Если токена нет, перенаправляем на главную с параметром ошибки
+    // Если cookie отсутствует, перенаправляем на главную с сообщением об ошибке
     return res.redirect('/?error=' + encodeURIComponent('Пожалуйста, авторизуйтесь'));
   }
-  // Если токен есть, проверяем его
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
-      // Если токен недействителен, перенаправляем с ошибкой
+      // Если токен недействителен или просрочен, тоже перенаправляем с ошибкой
       return res.redirect('/?error=' + encodeURIComponent('Неверный или просроченный токен'));
     }
-    // Если всё ок, отдаем страницу кабинета
-    res.json({ message: `👋 Добро пожаловать! Ваш Chat ID: ${decoded.chatId}` });
+    // Если токен действителен, отдаем HTML-страницу кабинета
+    res.sendFile(path.join(__dirname, 'pages', 'dashboard.html'));
   });
 });
 
