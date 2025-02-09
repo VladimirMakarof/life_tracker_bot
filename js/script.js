@@ -1,241 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-	const loginForm = document.getElementById('loginForm');
-	const codeForm = document.getElementById('codeForm');
-	const loginMessage = document.getElementById('loginMessage');
-	// Бургер-меню
-	const burgerMenu = document.querySelector('.burger-menu');
-	const navLinks = document.querySelector('.nav-links');
-	
-	burgerMenu.addEventListener('click', () => {
-			navLinks.classList.toggle('show');
-			burgerMenu.classList.toggle('active');
-	});
-
-	// Плавная прокрутка
-	document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-			anchor.addEventListener('click', function(e) {
-					e.preventDefault();
-					const target = document.querySelector(this.getAttribute('href'));
-					if (target) {
-							target.scrollIntoView({
-									behavior: 'smooth',
-									block: 'start'
-							});
-					}
-					
-					// Закрытие меню на мобильных
-					if (window.innerWidth <= 768) {
-							navLinks.classList.remove('show');
-							burgerMenu.classList.remove('active');
-					}
-			});
-	});
-
-// Функция, которая вызывается после успешной авторизации через Telegram
-function onTelegramAuth(user) {
-  console.log("Пользователь авторизовался через Telegram:", user);
-  
-  // Отправляем данные пользователя на сервер для обработки (если требуется)
-  fetch('/telegram-auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(user)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Сохраняем флаг авторизации и имя пользователя (например, в localStorage)
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userName', user.first_name);
-      // Обновляем UI: скрываем виджет и показываем информацию о пользователе
-      updateAuthUI();
-      // Можно перенаправить пользователя в кабинет или оставить на странице
-      // window.location.href = '/dashboard';
-    } else {
-      document.getElementById('loginMessage').textContent =
-        "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
-    }
-  })
-  .catch(error => {
-    console.error("Ошибка при авторизации:", error);
-    document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
-  });
-}
-
-
-// Функция обновления UI в зависимости от состояния авторизации
-function updateAuthUI() {
-	const isAuthenticated = localStorage.getItem('isAuthenticated');
-	const authContainer = document.getElementById('authContainer');
-	const logoutContainer = document.getElementById('logoutContainer');
-	
-	if (isAuthenticated === 'true') {
-		// Если пользователь авторизован, можно показать информацию о нём и кнопку "Выйти"
-		const userName = localStorage.getItem('userName') || '';
-		authContainer.innerHTML = `<p class="auth-info">Войти как ${userName}</p>`;
-		logoutContainer.classList.remove('hidden');
-	} else {
-		// Если не авторизован, показываем виджет авторизации
-		// Здесь можно восстановить исходную разметку для Telegram Login Widget,
-		// либо перезагрузить страницу
-		logoutContainer.classList.add('hidden');
-	}
-}
-
-// Проверка авторизации при загрузке страницы
-updateAuthUI();
-
-// Обработчик для кнопки "Выйти"
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-	logoutBtn.addEventListener('click', async () => {
-		try {
-			const response = await fetch('/logout', { method: 'POST' });
-			const data = await response.json();
-			if (data.success) {
-				// Убираем флаг авторизации
-				localStorage.removeItem('isAuthenticated');
-				localStorage.removeItem('userName');
-				// Обновляем UI, чтобы отобразить виджет авторизации
-				updateAuthUI();
-				// Можно также перенаправить пользователя на страницу авторизации
-				// window.location.href = '/login';
-			} else {
-				alert('Ошибка выхода: ' + (data.error || 'неизвестная ошибка'));
-			}
-		} catch (error) {
-			console.error("Ошибка при запросе /logout:", error);
-			alert("Ошибка сети или сервера при выходе.");
-		}
-	});
-}
-
-	// Подсветка активного раздела
-	const sections = document.querySelectorAll('section');
-	const navItems = document.querySelectorAll('.nav-links a');
-
-	window.addEventListener('scroll', () => {
-			let current = '';
-			sections.forEach(section => {
-					const sectionTop = section.offsetTop;
-					const sectionHeight = section.clientHeight;
-					if (window.scrollY >= sectionTop - sectionHeight / 3) {
-							current = section.getAttribute('id');
-					}
-			});
-
-			navItems.forEach(item => {
-					item.classList.remove('active');
-					if (item.getAttribute('href').includes(current)) {
-							item.classList.add('active');
-					}
-			});
-	});
-
-	// Аккордеон
-	const accordionItems = document.querySelectorAll('.accordion-item');
-	accordionItems.forEach(item => {
-			const header = item.querySelector('.accordion-header');
-			header.addEventListener('click', () => {
-					item.classList.toggle('active');
-			});
-	});
-
-	// Ленивая загрузка изображений
-	const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-	const observer = new IntersectionObserver((entries) => {
-			entries.forEach(entry => {
-					if (entry.isIntersecting) {
-							const img = entry.target;
-							img.src = img.dataset.src;
-							observer.unobserve(img);
-					}
-			});
-	});
-
-	lazyImages.forEach(img => {
-			observer.observe(img);
-	});
-
-
-	loginForm.addEventListener('submit', async (e) => {
-			e.preventDefault();
-			const chatId = document.getElementById('chatId').value;
-	
-			// Отправляем запрос на сервер
-			const response = await fetch('/request-login', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ chatId })
-			});
-	
-			const data = await response.json();
-			if (data.success) {
-					loginMessage.textContent = 'Код отправлен в Telegram!';
-					loginForm.classList.add('hidden');
-					codeForm.classList.remove('hidden');
-			} else {
-					loginMessage.textContent = data.error;
-			}
-	});
-	
-	codeForm.addEventListener('submit', async (e) => {
-		e.preventDefault();
-		const chatId = document.getElementById('chatId').value.trim();
-		const authCode = document.getElementById('authCode').value.trim();
-		if (!chatId || !authCode) {
-			loginMessage.textContent = "Введите ваш Chat ID и код.";
-			return;
-		}
-		
-		try {
-			const response = await fetch('/verify-deep-link', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ chatId, code: authCode })
-			});
-			const data = await response.json();
-			if (data.success) {
-				// Вместо автоматического редиректа выводим сообщение с ссылкой
-				loginMessage.innerHTML = "Авторизация успешна! <a href='/dashboard'>Перейти в Личный Кабинет</a>";
-			} else {
-				loginMessage.textContent = data.error || "Ошибка авторизации.";
-			}
-		} catch (error) {
-			console.error("Ошибка при запросе /verify-deep-link:", error);
-			loginMessage.textContent = "Ошибка сети или сервера.";
-		}
-	});
-
-
-
-		
-
-
-
-
-// Другой код (например, для меню, прокрутки, аккордеона и т.д.)
-document.addEventListener('DOMContentLoaded', () => {
-  // Пример: бургер-меню, плавная прокрутка, аккордеон, ленивая загрузка изображений
+  // ------------------------------
+  // 1. Инициализация базового UI: бургер-меню, плавная прокрутка
+  // ------------------------------
   const burgerMenu = document.querySelector('.burger-menu');
   const navLinks = document.querySelector('.nav-links');
-  
-  burgerMenu.addEventListener('click', () => {
-    navLinks.classList.toggle('show');
-    burgerMenu.classList.toggle('active');
-  });
+
+  if (burgerMenu) {
+    burgerMenu.addEventListener('click', () => {
+      navLinks.classList.toggle('show');
+      burgerMenu.classList.toggle('active');
+    });
+  }
 
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
       e.preventDefault();
       const target = document.querySelector(this.getAttribute('href'));
       if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+      // Если экран мал, закрываем меню
       if (window.innerWidth <= 768) {
         navLinks.classList.remove('show');
         burgerMenu.classList.remove('active');
@@ -243,52 +27,113 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Другой вспомогательный функционал (аккордеон, ленивые изображения и т.д.)
-});
+  // ------------------------------
+  // 2. Функция обновления UI в зависимости от состояния авторизации
+  // ------------------------------
+  function updateAuthUI() {
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    const authContainer = document.getElementById('authContainer'); // если есть контейнер для информации о пользователе
+    const logoutContainer = document.getElementById('logoutContainer');
+    if (isAuthenticated === 'true') {
+      const userName = localStorage.getItem('userName') || '';
+      if (authContainer) {
+        authContainer.innerHTML = `<p class="auth-info">Войти как ${userName}</p>`;
+      }
+      if (logoutContainer) {
+        logoutContainer.classList.remove('hidden');
+      }
+    } else {
+      if (logoutContainer) {
+        logoutContainer.classList.add('hidden');
+      }
+    }
+  }
 
-	
+  // Вызываем обновление UI при загрузке страницы
+  updateAuthUI();
 
-	// Обновление профиля пользователя
-// app.put('/api/user', authenticateToken, (req, res) => {
-//   const { name, birthdate, target_age, language, morning_time, evening_time } = req.body;
-  
-//   const result = db.prepare(`
-//     UPDATE users 
-//     SET name = ?, birthdate = ?, target_age = ?, language = ?, morning_time = ?, evening_time = ?
-//     WHERE chat_id = ?
-//   `).run(name, birthdate, target_age, language, morning_time, evening_time, req.user.chatId);
-  
-//   if (result.changes > 0) {
-//     res.json({ success: true, message: 'Профиль обновлён' });
-//   } else {
-//     res.status(400).json({ success: false, error: 'Ошибка обновления профиля' });
-//   }
-// });
+  // ------------------------------
+  // 3. Обработчик для кнопки "Выйти"
+  // ------------------------------
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/logout', { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          localStorage.removeItem('isAuthenticated');
+          localStorage.removeItem('userName');
+          updateAuthUI();
+          // Перенаправление (например, на страницу входа)
+          window.location.href = '/login';
+        } else {
+          alert('Ошибка выхода: ' + (data.error || 'неизвестная ошибка'));
+        }
+      } catch (error) {
+        console.error("Ошибка при запросе /logout:", error);
+        alert("Ошибка сети или сервера при выходе.");
+      }
+    });
+  }
 
-// Удаление аккаунта пользователя
-// app.delete('/api/user', authenticateToken, (req, res) => {
-//   const chatId = req.user.chatId;
-//   const userId = db.prepare('SELECT id FROM users WHERE chat_id = ?')
-//                    .pluck().get(chatId);
-//   if (!userId) {
-//     return res.status(404).json({ success: false, error: 'Пользователь не найден' });
-//   }
-  
-//   const deleteUser = db.transaction(() => {
-//     db.prepare('DELETE FROM settings WHERE user_id = ?').run(userId);
-//     db.prepare('DELETE FROM goals WHERE user_id = ?').run(userId);
-//     db.prepare('DELETE FROM daily_logs WHERE user_id = ?').run(userId);
-//     db.prepare('DELETE FROM notifications WHERE user_id = ?').run(userId);
-//     db.prepare('DELETE FROM users WHERE id = ?').run(userId);
-//   });
-  
-//   try {
-//     deleteUser();
-//     res.json({ success: true, message: 'Пользователь удалён' });
-//   } catch (e) {
-//     res.status(500).json({ success: false, error: 'Ошибка при удалении пользователя' });
-//   }
-// });
+  // ------------------------------
+  // 4. Функция авторизации через Telegram Login Widget
+  // ------------------------------
+  window.onTelegramAuth = function(user) {
+    console.log("Пользователь авторизовался через Telegram:", user);
+    fetch('/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Сохраняем флаг авторизации и имя пользователя
+          localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('userName', user.first_name);
+          updateAuthUI();
+          // Автоматически перенаправляем пользователя в личный кабинет
+          window.location.href = '/dashboard';
+        } else {
+          document.getElementById('loginMessage').textContent =
+            "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+        }
+      })
+      .catch(error => {
+        console.error("Ошибка при запросе /telegram-auth:", error);
+        document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
+      });
+  };
 
+  // ------------------------------
+  // 5. Обработка аккордеона и ленивой загрузки изображений
+  // ------------------------------
+  const accordionItems = document.querySelectorAll('.accordion-item');
+  accordionItems.forEach(item => {
+    const header = item.querySelector('.accordion-header');
+    if (header) {
+      header.addEventListener('click', () => {
+        item.classList.toggle('active');
+      });
+    }
+  });
 
+  const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        observer.unobserve(img);
+      }
+    });
+  });
+  lazyImages.forEach(img => observer.observe(img));
+
+  // ------------------------------
+  // 6. Дополнительный вспомогательный функционал (если требуется)
+  // ------------------------------
+  // Здесь можно добавить другие слушатели или функции
 });
