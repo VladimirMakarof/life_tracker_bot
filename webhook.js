@@ -310,25 +310,25 @@ app.post('/verify-deep-link', (req, res) => {
 });
 
 
-app.post('/verify-login', (req, res) => {
-  try {
-    const { chatId, code } = req.body;
-    if (!chatId || !code) {
-      return res.status(400).json({ success: false, error: '❌ Chat ID и код обязательны.' });
-    }
-    const record = db.prepare('SELECT * FROM login_codes WHERE chat_id = ?').get(chatId);
-    if (!record || record.code !== code || new Date(record.expires_at) < new Date()) {
-      return res.status(400).json({ success: false, error: '❌ Неверный или просроченный код' });
-    }
-    db.prepare('DELETE FROM login_codes WHERE chat_id = ?').run(chatId);
-    const token = jwt.sign({ chatId }, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRATION || '7d' });
-    res.cookie('auth_token', token, { httpOnly: true, secure: true, sameSite: 'Strict' });
-    res.json({ success: true, message: '✅ Авторизация успешна!', token });
-  } catch (error) {
-    console.error('❌ Ошибка при обработке запроса /verify-login:', error);
-    res.status(500).json({ success: false, error: '❌ Внутренняя ошибка сервера.' });
-  }
-});
+// app.post('/verify-login', (req, res) => {
+//   try {
+//     const { chatId, code } = req.body;
+//     if (!chatId || !code) {
+//       return res.status(400).json({ success: false, error: '❌ Chat ID и код обязательны.' });
+//     }
+//     const record = db.prepare('SELECT * FROM login_codes WHERE chat_id = ?').get(chatId);
+//     if (!record || record.code !== code || new Date(record.expires_at) < new Date()) {
+//       return res.status(400).json({ success: false, error: '❌ Неверный или просроченный код' });
+//     }
+//     db.prepare('DELETE FROM login_codes WHERE chat_id = ?').run(chatId);
+//     const token = jwt.sign({ chatId }, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRATION || '7d' });
+//     res.cookie('auth_token', token, { httpOnly: true, secure: true, sameSite: 'Strict' });
+//     res.json({ success: true, message: '✅ Авторизация успешна!', token });
+//   } catch (error) {
+//     console.error('❌ Ошибка при обработке запроса /verify-login:', error);
+//     res.status(500).json({ success: false, error: '❌ Внутренняя ошибка сервера.' });
+//   }
+// });
 
 // Middleware для проверки JWT
 const authenticateToken = (req, res, next) => {
