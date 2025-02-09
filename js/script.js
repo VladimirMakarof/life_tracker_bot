@@ -34,34 +34,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Функция, которая вызывается после успешной авторизации через Telegram
 function onTelegramAuth(user) {
-	console.log("Пользователь авторизовался через Telegram:", user);
-	
-	// Отправляем данные пользователя на сервер для обработки (если требуется)
-	fetch('/telegram-auth', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(user)
-	})
-	.then(response => response.json())
-	.then(data => {
-		if (data.success) {
-			// Сохраняем флаг авторизации и имя пользователя (например, в localStorage)
-			localStorage.setItem('isAuthenticated', 'true');
-			localStorage.setItem('userName', user.first_name);
-			// Обновляем UI: скрываем виджет и показываем информацию о пользователе
-			updateAuthUI();
-			// Можно перенаправить пользователя в кабинет или оставить на странице
-			// window.location.href = '/dashboard';
-		} else {
-			document.getElementById('loginMessage').textContent =
-				"Ошибка авторизации: " + (data.error || "неизвестная ошибка");
-		}
-	})
-	.catch(error => {
-		console.error("Ошибка при авторизации:", error);
-		document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
-	});
+  console.log("Пользователь авторизовался через Telegram:", user);
+  
+  // Отправляем данные пользователя на сервер для обработки (если требуется)
+  fetch('/telegram-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(user)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Сохраняем флаг авторизации и имя пользователя (например, в localStorage)
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', user.first_name);
+      // Обновляем UI: скрываем виджет и показываем информацию о пользователе
+      updateAuthUI();
+      // Можно перенаправить пользователя в кабинет или оставить на странице
+      // window.location.href = '/dashboard';
+    } else {
+      document.getElementById('loginMessage').textContent =
+        "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+    }
+  })
+  .catch(error => {
+    console.error("Ошибка при авторизации:", error);
+    document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
+  });
 }
+
 
 // Функция обновления UI в зависимости от состояния авторизации
 function updateAuthUI() {
@@ -158,85 +159,59 @@ if (logoutBtn) {
 	});
 
 
-	// loginForm.addEventListener('submit', async (e) => {
-	// 		e.preventDefault();
-	// 		const chatId = document.getElementById('chatId').value;
-
-	// 		// Отправляем запрос на сервер
-	// 		const response = await fetch('/request-login', {
-	// 				method: 'POST',
-	// 				headers: { 'Content-Type': 'application/json' },
-	// 				body: JSON.stringify({ chatId })
-	// 		});
-
-	// 		const data = await response.json();
-	// 		if (data.success) {
-	// 				loginMessage.textContent = 'Код отправлен в Telegram!';
-	// 				loginForm.classList.add('hidden');
-	// 				codeForm.classList.remove('hidden');
-	// 		} else {
-	// 				loginMessage.textContent = data.error;
-	// 		}
-	// });
-
-	// codeForm.addEventListener('submit', async (e) => {
-	// 	e.preventDefault();
-	// 	const chatId = document.getElementById('chatId').value.trim();
-	// 	const authCode = document.getElementById('authCode').value.trim();
-	// 	if (!chatId || !authCode) {
-	// 		loginMessage.textContent = "Введите ваш Chat ID и код.";
-	// 		return;
-	// 	}
+	loginForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const chatId = document.getElementById('chatId').value;
+	
+			// Отправляем запрос на сервер
+			const response = await fetch('/request-login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ chatId })
+			});
+	
+			const data = await response.json();
+			if (data.success) {
+					loginMessage.textContent = 'Код отправлен в Telegram!';
+					loginForm.classList.add('hidden');
+					codeForm.classList.remove('hidden');
+			} else {
+					loginMessage.textContent = data.error;
+			}
+	});
+	
+	codeForm.addEventListener('submit', async (e) => {
+		e.preventDefault();
+		const chatId = document.getElementById('chatId').value.trim();
+		const authCode = document.getElementById('authCode').value.trim();
+		if (!chatId || !authCode) {
+			loginMessage.textContent = "Введите ваш Chat ID и код.";
+			return;
+		}
 		
-	// 	try {
-	// 		const response = await fetch('/verify-deep-link', {
-	// 			method: 'POST',
-	// 			headers: { 'Content-Type': 'application/json' },
-	// 			body: JSON.stringify({ chatId, code: authCode })
-	// 		});
-	// 		const data = await response.json();
-	// 		if (data.success) {
-	// 			// Вместо автоматического редиректа выводим сообщение с ссылкой
-	// 			loginMessage.innerHTML = "Авторизация успешна! <a href='/dashboard'>Перейти в Личный Кабинет</a>";
-	// 		} else {
-	// 			loginMessage.textContent = data.error || "Ошибка авторизации.";
-	// 		}
-	// 	} catch (error) {
-	// 		console.error("Ошибка при запросе /verify-deep-link:", error);
-	// 		loginMessage.textContent = "Ошибка сети или сервера.";
-	// 	}
-	// });
+		try {
+			const response = await fetch('/verify-deep-link', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ chatId, code: authCode })
+			});
+			const data = await response.json();
+			if (data.success) {
+				// Вместо автоматического редиректа выводим сообщение с ссылкой
+				loginMessage.innerHTML = "Авторизация успешна! <a href='/dashboard'>Перейти в Личный Кабинет</a>";
+			} else {
+				loginMessage.textContent = data.error || "Ошибка авторизации.";
+			}
+		} catch (error) {
+			console.error("Ошибка при запросе /verify-deep-link:", error);
+			loginMessage.textContent = "Ошибка сети или сервера.";
+		}
+	});
 
 
 
 		
-// Эта функция будет вызвана автоматически после авторизации через Telegram Login Widget
-function onTelegramAuth(user) {
-  console.log("onTelegramAuth вызвана, получены данные пользователя:", user);
-  fetch('/telegram-auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(user)
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log("Ответ от /telegram-auth:", data);
-    if (data.success) {
-      // Устанавливаем флаг авторизации, если нужно
-      localStorage.setItem('isAuthenticated', 'true');
-      // Редирект в кабинет
-      window.location.href = '/dashboard';
-    } else {
-      document.getElementById('loginMessage').textContent =
-        "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
-    }
-  })
-  .catch(error => {
-    console.error("Ошибка при запросе /telegram-auth:", error);
-    document.getElementById('loginMessage').textContent =
-      "Ошибка сети или сервера.";
-  });
-}
+
 
 
 
