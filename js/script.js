@@ -32,6 +32,26 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 	});
 
+	const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const response = await fetch('/logout', { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+          // После успешного выхода перенаправляем пользователя на страницу авторизации
+          window.location.href = '/login';
+        } else {
+          alert('Ошибка выхода: ' + (data.error || 'неизвестная ошибка'));
+        }
+      } catch (error) {
+        console.error("Ошибка при запросе /logout:", error);
+        alert("Ошибка сети или сервера при выходе.");
+      }
+    });
+  }
+
 	// Подсветка активного раздела
 	const sections = document.querySelectorAll('section');
 	const navItems = document.querySelectorAll('.nav-links a');
