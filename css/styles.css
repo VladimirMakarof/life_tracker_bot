@@ -231,7 +231,7 @@ nav {
   }
 }
 
-/* Плавающая кнопка */
+/* Плавающая кнопка */ 
 .floating-telegram {
 	position: fixed;
 	bottom: 2rem;
