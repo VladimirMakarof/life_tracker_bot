@@ -55,42 +55,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Вызываем обновление UI при загрузке страницы
   updateAuthUI();
-	window.onTelegramAuth = function(user) {
-		console.log("Пользователь авторизовался через Telegram:", user);
-	
-		fetch('/telegram-auth', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			// Передаём user, а не userFromTelegram
-			body: JSON.stringify(user)
-		})
-		.then(response => response.json())
-		.then(data => {
-			console.log("Ответ от /telegram-auth:", data);
-			if (data.success) {
-				// Сохраняем токен
-				localStorage.setItem('auth_token', data.token);
-	
-				// Флаг, что мы авторизованы
-				localStorage.setItem('isAuthenticated', 'true');
-				// Если хотим сохранить имя пользователя
-				localStorage.setItem('userName', user.first_name);
-	
-				// Обновляем UI (например, чтобы скрыть кнопку авторизации)
-				updateAuthUI();
-	
-				// Переходим в личный кабинет
-				window.location.href = '/dashboard';
-			} else {
-				document.getElementById('loginMessage').textContent =
-					"Ошибка авторизации: " + (data.error || "неизвестная ошибка");
-			}
-		})
-		.catch(error => {
-			console.error("Ошибка при запросе /telegram-auth:", error);
-			document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
-		});
-	};
+  window.onTelegramAuth = function(user) {
+    console.log("[DEBUG] onTelegramAuth вызван. user =", user);
+
+    fetch('/telegram-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // Передаём user, а не userFromTelegram
+      body: JSON.stringify(user)
+    })
+    .then(response => {
+      console.log("[DEBUG] Получен ответ (Response) от /telegram-auth:", response);
+      return response.json();
+    })
+    .then(data => {
+      console.log("[DEBUG] JSON-данные от /telegram-auth:", data);
+
+      if (data.success) {
+        console.log("[DEBUG] Авторизация успешна. Сохраняем токен:", data.token);
+
+        // Сохраняем токен
+        localStorage.setItem('auth_token', data.token);
+
+        // Ставим флаг, что пользователь авторизован
+        localStorage.setItem('isAuthenticated', 'true');
+
+        // Сохраняем имя пользователя (при желании)
+        localStorage.setItem('userName', user.first_name);
+
+        console.log("[DEBUG] Вызываем updateAuthUI()...");
+        updateAuthUI();
+
+        console.log("[DEBUG] Перенаправляем пользователя на /dashboard...");
+        window.location.href = '/dashboard';
+
+      } else {
+        console.log("[DEBUG] Ошибка авторизации:", data.error);
+
+        // Показываем сообщение об ошибке
+        document.getElementById('loginMessage').textContent =
+          "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+      }
+    })
+    .catch(error => {
+      console.error("[DEBUG] Ошибка при запросе /telegram-auth:", error);
+      document.getElementById('loginMessage').textContent =
+        "Ошибка сети или сервера.";
+    });
+  };
 	
 	
 
