@@ -262,26 +262,6 @@ app.post('/telegram-auth', (req, res) => {
 
 
 
-
-
-// Функция установки вебхука для Telegram
-// async function setTelegramWebhook() {
-//   try {
-//     const response = await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
-//       url: `${url}/bot${BOT_TOKEN}`,
-//       secret_token: SECRET,
-//     });
-//     if (response.data.ok) {
-//       console.log('✅ Вебхук для Telegram установлен успешно');
-//     } else {
-//       console.error('❌ Ошибка при установке вебхука для Telegram:', response.data);
-//     }
-//   } catch (error) {
-//     console.error('❌ Ошибка при установке вебхука для Telegram:', error);
-//   }
-// }
-// setTelegramWebhook();
-
 // -------------------------
 // Серверная логика: API, авторизация и личный кабинет
 // -------------------------
@@ -368,7 +348,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 
-// Убираем дубликат! Оставляем один “правильный”:
+
 app.get('/dashboard', (req, res) => {
   // 1. Проверяем cookie
   const token = req.cookies.auth_token;
