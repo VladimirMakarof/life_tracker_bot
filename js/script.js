@@ -212,7 +212,7 @@ if (logoutBtn) {
 		
 // Эта функция будет вызвана автоматически после авторизации через Telegram Login Widget
 function onTelegramAuth(user) {
-  console.log("Пользователь авторизовался через Telegram:", user);
+  console.log("onTelegramAuth вызвана, получены данные пользователя:", user);
   fetch('/telegram-auth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -220,17 +220,24 @@ function onTelegramAuth(user) {
   })
   .then(response => response.json())
   .then(data => {
+    console.log("Ответ от /telegram-auth:", data);
     if (data.success) {
+      // Устанавливаем флаг авторизации, если нужно
+      localStorage.setItem('isAuthenticated', 'true');
+      // Редирект в кабинет
       window.location.href = '/dashboard';
     } else {
-      document.getElementById('loginMessage').textContent = "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+      document.getElementById('loginMessage').textContent =
+        "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
     }
   })
   .catch(error => {
-    console.error("Ошибка:", error);
-    document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
+    console.error("Ошибка при запросе /telegram-auth:", error);
+    document.getElementById('loginMessage').textContent =
+      "Ошибка сети или сервера.";
   });
 }
+
 
 
 // Другой код (например, для меню, прокрутки, аккордеона и т.д.)

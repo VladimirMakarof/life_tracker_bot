@@ -212,6 +212,20 @@ app.post(`/bot${BOT_TOKEN}`, (req, res) => {
   }
 });
 
+app.post('/telegram-auth', (req, res) => {
+  // Пример: проверить данные пользователя, создать JWT-токен, установить cookie и вернуть success
+  
+  const user = req.body;
+  // Здесь должна быть проверка подписи и т.п.
+  if (user && user.id) {
+    // Предположим, авторизация успешна:
+    res.json({ success: true });
+  } else {
+    res.json({ success: false, error: "Неверные данные" });
+  }
+});
+
+
 
 // Функция установки вебхука для Telegram
 // async function setTelegramWebhook() {
