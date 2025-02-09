@@ -1,4 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+  function checkCookiesEnabled() {
+    // Устанавливаем тестовую куку
+    document.cookie = "testcookie=1; SameSite=Strict";
+    // Проверяем, появилась ли она в document.cookie
+    if (document.cookie.indexOf("testcookie") === -1) {
+      // Если тестовая кука не найдена, куки отключены
+      displayCookiesDisabledMessage();
+    } else {
+      // Если куки включены, удаляем тестовую куку
+      document.cookie = "testcookie=; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
+    }
+  }
+
+  // Функция для отображения уведомления о необходимости включить куки
+  function displayCookiesDisabledMessage() {
+    const notificationDiv = document.createElement('div');
+    notificationDiv.style.position = 'fixed';
+    notificationDiv.style.top = '0';
+    notificationDiv.style.left = '0';
+    notificationDiv.style.right = '0';
+    notificationDiv.style.backgroundColor = '#ffcc00';
+    notificationDiv.style.color = '#000';
+    notificationDiv.style.padding = '1rem';
+    notificationDiv.style.textAlign = 'center';
+    notificationDiv.style.zIndex = '10000';
+    notificationDiv.textContent = 'Для корректной работы сайта, пожалуйста, включите куки в настройках вашего браузера.';
+    document.body.prepend(notificationDiv);
+  }
+
+  // Вызываем проверку при загрузке страницы
+  checkCookiesEnabled();
+
   // Функция обновления интерфейса в зависимости от авторизации
   function updateAuthUI() {
     const authContainer = document.getElementById('authContainer'); // контейнер для информации "Войти как {Имя}"
@@ -25,34 +58,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Глобальная функция для обратного вызова авторизации через Telegram.
   // Её вызовет Telegram Login Widget.
-  window.onTelegramAuth = function(user) {
-    console.log("Пользователь авторизовался через Telegram:", user);
-    fetch('/telegram-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Ответ от /telegram-auth:", data);
-      if (data.success) {
-        // Сохраняем флаг авторизации и имя пользователя
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userName', user.first_name);
-        updateAuthUI();
-        // Автоматически перенаправляем пользователя в личный кабинет
-        window.location.href = '/dashboard';
-      } else {
-        document.getElementById('loginMessage').textContent =
-          "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
-      }
-    })
-    .catch(error => {
-      console.error("Ошибка при запросе /telegram-auth:", error);
-      document.getElementById('loginMessage').textContent =
-        "Ошибка сети или сервера.";
-    });
-  };
+	window.onTelegramAuth = function(user) {
+		console.log("Пользователь авторизовался через Telegram:", user);
+		fetch('/telegram-auth', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include', // <--- добавьте эту строку
+			body: JSON.stringify(user)
+		})
+		.then(response => response.json())
+		.then(data => {
+			console.log("Ответ от /telegram-auth:", data);
+			if (data.success) {
+				// Сохраняем флаг авторизации и имя пользователя (если нужно)
+				localStorage.setItem('isAuthenticated', 'true');
+				localStorage.setItem('userName', user.first_name);
+				updateAuthUI();
+				// Автоматически перенаправляем пользователя в личный кабинет
+				window.location.href = '/dashboard';
+			} else {
+				document.getElementById('loginMessage').textContent =
+					"Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+			}
+		})
+		.catch(error => {
+			console.error("Ошибка при запросе /telegram-auth:", error);
+			document.getElementById('loginMessage').textContent =
+				"Ошибка сети или сервера.";
+		});
+	};
+	
 
   // Обработчик для кнопки "Выйти"
   const logoutBtn = document.getElementById('logoutBtn');
