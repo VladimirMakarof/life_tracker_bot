@@ -182,11 +182,11 @@
 								.then(response => response.json())
 								.then(data => {
 									if (data.success) {
-										// Сохраняем флаг авторизации (для демонстрации)
+										// Сохраняем флаг авторизации 
 										localStorage.setItem('isAuthenticated', 'true');
 										// Показываем кнопку "Выйти"
 										document.getElementById('logoutContainer').classList.remove('hidden');
-										// Переходим в личный кабинет (или выполняем другую логику)
+										// Переходим в личный кабинет 
 										window.location.href = '/dashboard';
 									} else {
 										document.getElementById('loginMessage').textContent =

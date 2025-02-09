@@ -32,40 +32,83 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 	});
 
-	function checkAuth() {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    const logoutContainer = document.getElementById('logoutContainer');
-    if (isAuthenticated === 'true') {
-      logoutContainer.classList.remove('hidden');
-    } else {
-      logoutContainer.classList.add('hidden');
-    }
-  }
+// Функция, которая вызывается после успешной авторизации через Telegram
+function onTelegramAuth(user) {
+	console.log("Пользователь авторизовался через Telegram:", user);
+	
+	// Отправляем данные пользователя на сервер для обработки (если требуется)
+	fetch('/telegram-auth', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(user)
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.success) {
+			// Сохраняем флаг авторизации и имя пользователя (например, в localStorage)
+			localStorage.setItem('isAuthenticated', 'true');
+			localStorage.setItem('userName', user.first_name);
+			// Обновляем UI: скрываем виджет и показываем информацию о пользователе
+			updateAuthUI();
+			// Можно перенаправить пользователя в кабинет или оставить на странице
+			// window.location.href = '/dashboard';
+		} else {
+			document.getElementById('loginMessage').textContent =
+				"Ошибка авторизации: " + (data.error || "неизвестная ошибка");
+		}
+	})
+	.catch(error => {
+		console.error("Ошибка при авторизации:", error);
+		document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
+	});
+}
 
-  // Вызываем проверку авторизации при загрузке страницы
-  checkAuth();
+// Функция обновления UI в зависимости от состояния авторизации
+function updateAuthUI() {
+	const isAuthenticated = localStorage.getItem('isAuthenticated');
+	const authContainer = document.getElementById('authContainer');
+	const logoutContainer = document.getElementById('logoutContainer');
+	
+	if (isAuthenticated === 'true') {
+		// Если пользователь авторизован, можно показать информацию о нём и кнопку "Выйти"
+		const userName = localStorage.getItem('userName') || '';
+		authContainer.innerHTML = `<p class="auth-info">Войти как ${userName}</p>`;
+		logoutContainer.classList.remove('hidden');
+	} else {
+		// Если не авторизован, показываем виджет авторизации
+		// Здесь можно восстановить исходную разметку для Telegram Login Widget,
+		// либо перезагрузить страницу
+		logoutContainer.classList.add('hidden');
+	}
+}
 
-  // Обработчик для кнопки "Выйти"
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        const response = await fetch('/logout', { method: 'POST' });
-        const data = await response.json();
-        if (data.success) {
-          // Убираем флаг авторизации
-          localStorage.removeItem('isAuthenticated');
-          // Перенаправляем пользователя на страницу авторизации или главную страницу
-          window.location.href = '/login';
-        } else {
-          alert('Ошибка выхода: ' + (data.error || 'неизвестная ошибка'));
-        }
-      } catch (error) {
-        console.error("Ошибка при запросе /logout:", error);
-        alert("Ошибка сети или сервера при выходе.");
-      }
-    });
-  }
+// Проверка авторизации при загрузке страницы
+updateAuthUI();
+
+// Обработчик для кнопки "Выйти"
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+	logoutBtn.addEventListener('click', async () => {
+		try {
+			const response = await fetch('/logout', { method: 'POST' });
+			const data = await response.json();
+			if (data.success) {
+				// Убираем флаг авторизации
+				localStorage.removeItem('isAuthenticated');
+				localStorage.removeItem('userName');
+				// Обновляем UI, чтобы отобразить виджет авторизации
+				updateAuthUI();
+				// Можно также перенаправить пользователя на страницу авторизации
+				// window.location.href = '/login';
+			} else {
+				alert('Ошибка выхода: ' + (data.error || 'неизвестная ошибка'));
+			}
+		} catch (error) {
+			console.error("Ошибка при запросе /logout:", error);
+			alert("Ошибка сети или сервера при выходе.");
+		}
+	});
+}
 
 	// Подсветка активного раздела
 	const sections = document.querySelectorAll('section');
