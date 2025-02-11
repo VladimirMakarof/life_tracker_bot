@@ -1,0 +1,41 @@
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background: #f4f4f4;
+}
+.gradient-bg {
+	background: linear-gradient(135deg, #2A9D8F, #264653);
+	padding: 20px;
+	text-align: center;
+	color: white;
+}
+.nav-links {
+	list-style: none;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+}
+.nav-links li {
+	margin: 0 15px;
+}
+.nav-links a {
+	color: white;
+	text-decoration: none;
+}
+.hero {
+	text-align: center;
+	padding: 50px 20px;
+}
+.cta-button {
+	display: inline-block;
+	background: #E9C46A;
+	color: #2B2D42;
+	padding: 10px 20px;
+	text-decoration: none;
+	font-weight: bold;
+	border-radius: 5px;
+}
+.cta-button:hover {
+	background: #F4A261;
+}
