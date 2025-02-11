@@ -39,3 +39,17 @@ body {
 .cta-button:hover {
 	background: #F4A261;
 }
+.logo-img{
+	height: 40px;
+}
+
+.burger-menu {
+  display: block;
+}
+
+/* На экранах шире 768px скрываем бургер-меню */  
+@media screen and (min-width: 768px) {
+  .burger-menu {
+    display: none;
+  }
+}
