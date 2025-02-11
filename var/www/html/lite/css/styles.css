@@ -1,46 +1,224 @@
-body {
-	font-family: Arial, sans-serif;
+:root {
+	--primary-color: #2A9D8F;
+	--secondary-color: #264653;
+	--accent-color: #E9C46A;
+	--text-color: #2B2D42;
+	--transition-speed: 0.3s;
+}
+
+* {
+	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
-	background: #f4f4f4;
 }
+
+body {
+	font-family: 'Arial', sans-serif;
+	line-height: 1.6;
+	color: var(--text-color);
+	overflow-x: hidden;
+}
+
 .gradient-bg {
-	background: linear-gradient(135deg, #2A9D8F, #264653);
-	padding: 20px;
-	text-align: center;
+	background: linear-gradient(135deg, var(--primary-color) 0%, #21867a 100%);
+}
+
+/* Навигация */
+nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 5%;
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+.logo {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 1.5rem;
+	font-weight: 700;
 	color: white;
 }
+
+.logo-img {
+	/* width: 40px; */
+	height: 40px;
+}
+
 .nav-links {
-	list-style: none;
-	padding: 0;
 	display: flex;
-	justify-content: center;
+	gap: 2rem;
+	list-style: none;
 }
-.nav-links li {
-	margin: 0 15px;
-}
+
 .nav-links a {
 	color: white;
 	text-decoration: none;
+	transition: color var(--transition-speed);
 }
+
+.nav-links a:hover {
+	color: var(--accent-color);
+}
+
+.telegram-btn {
+	background: #0088cc;
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+/* Герой секция */
 .hero {
+	display: flex;
+	align-items: center;
+	padding: 4rem 5%;
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+.hero-content {
+	flex: 1;
+	padding-right: 2rem;
+}
+
+.hero-image {
+	flex: 1;
 	text-align: center;
-	padding: 50px 20px;
 }
+
+.bot-preview {
+	max-width: 100%;
+	height: auto;
+	border-radius: 20px;
+	box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.hero h1 {
+	font-size: 2.5rem;
+	margin-bottom: 1.5rem;
+	color: white;
+	line-height: 1.2;
+}
+
+.hero-subtitle {
+	font-size: 1.2rem;
+	margin-bottom: 2rem;
+	color: rgba(255,255,255,0.9);
+}
+
+/* Кнопка CTA */
 .cta-button {
-	display: inline-block;
-	background: #E9C46A;
-	color: #2B2D42;
-	padding: 10px 20px;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.8rem;
+	padding: 1rem 2.5rem;
+	background: var(--accent-color);
+	color: var(--text-color);
+	border-radius: 50px;
+	font-weight: 700;
 	text-decoration: none;
-	font-weight: bold;
-	border-radius: 5px;
+	transition: transform var(--transition-speed);
 }
+
 .cta-button:hover {
-	background: #F4A261;
+	transform: translateY(-3px);
 }
-.logo-img{
-	height: 40px;
+
+/* Статистика */
+.stats {
+	display: flex;
+	gap: 3rem;
+	margin-top: 3rem;
+}
+
+.stat-item {
+	background: rgba(255,255,255,0.1);
+	padding: 1.5rem;
+	border-radius: 15px;
+	text-align: center;
+}
+
+.stat-number {
+	font-size: 2.2rem;
+	font-weight: 700;
+	color: white;
+}
+
+.stat-text {
+	color: rgba(255,255,255,0.9);
+	font-size: 0.95rem;
+}
+
+/* Секции */
+.section-inner {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: 4rem 5%;
+	/* background-color: #2A9D8F; */
+}
+
+.section-wave {
+	position: relative;
+	background: white;
+}
+
+.section-wave::after {
+	content: '';
+	position: absolute;
+	bottom: -50px;
+	left: 0;
+	width: 100%;
+	height: 100px;
+	/* background: url('wave.svg') repeat-x; */
+	z-index: 1;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+	.hero {
+			flex-direction: column;
+			text-align: center;
+			padding: 2rem 5%;
+	}
+
+	.hero-content {
+			padding-right: 0;
+			margin-bottom: 2rem;
+	}
+
+	.stats {
+			flex-direction: column;
+			gap: 1.5rem;
+	}
+
+	.nav-links {
+			display: none;
+			position: absolute;
+			top: 70px;
+			right: 5%;
+			background: var(--primary-color);
+			flex-direction: column;
+			width: 90%;
+			border-radius: 10px;
+			padding: 1rem;
+	}
+
+	.nav-links.show {
+			display: flex;
+	}
+
+	.burger-menu {
+			
+			background: none;
+			border: none;
+			color: white;
+			font-size: 1.8rem;
+	}
 }
 
 .burger-menu {
@@ -52,4 +230,280 @@ body {
   .burger-menu {
     display: none;
   }
+}
+
+/* Плавающая кнопка */ 
+.floating-telegram {
+	position: fixed;
+	bottom: 2rem;
+	right: 2rem;
+	z-index: 1000;
+}
+
+.float-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	background: #0088cc;
+	color: white;
+	font-size: 2rem;
+	box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+	transition: all var(--transition-speed);
+	text-decoration: none;
+}
+
+.float-btn:hover {
+	transform: scale(1.1) rotate(15deg);
+}
+
+/* Футер */
+footer {
+	background: var(--secondary-color);
+	color: white;
+	padding: 4rem 0 0;
+}
+
+.footer-content {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: 0 5%;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 2rem;
+}
+
+.footer-section h4 {
+	margin-bottom: 1rem;
+	color: var(--accent-color);
+}
+
+.social-links {
+	display: flex;
+	gap: 1rem;
+	font-size: 1.5rem;
+}
+
+.footer-bottom {
+	text-align: center;
+	padding: 2rem 0;
+	margin-top: 2rem;
+	border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+
+/* Стили для секции авторизации с уникальными классами */
+.login-section {
+  background: #fff;
+  padding: 4rem 5%;
+  /* max-width: 600px;
+  margin: 2rem auto; */
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-section__inner {
+  text-align: center;
+}
+
+.login-section__title {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.login-section__subtitle {
+  font-size: 1rem;
+  color: var(--text-color);
+  margin-bottom: 2rem;
+}
+
+/* Контейнер формы авторизации */
+.login-section__form-container {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Стили для форм */
+.login-section__form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0 auto;
+}
+
+.login-section__label {
+  font-weight: bold;
+  color: var(--secondary-color);
+  text-align: left;
+}
+
+.login-section__input {
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border var(--transition-speed);
+}
+
+.login-section__input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.login-section__button {
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background var(--transition-speed);
+}
+
+.login-section__button:hover {
+  background-color: var(--secondary-color);
+}
+
+.login-section__message {
+  font-size: 1rem;
+  color: var(--text-color);
+}
+.error-message {
+	color: red;
+}
+
+/* Стили для блока инструкции */
+.login-section__instruction {
+  background: #f7f7f7;
+  padding: 1.5rem;
+  border-radius: 5px;
+  text-align: left;
+  color: var(--text-color);
+  font-size: 0.95rem;
+  margin-top: 2rem;
+}
+
+.login-section__instruction-title {
+  margin-bottom: 0.8rem;
+  color: var(--primary-color);
+}
+
+.login-section__instruction-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.login-section__instruction-list li {
+  margin-bottom: 0.5rem;
+}
+
+/* Класс для скрытых элементов */
+.login-section__form--hidden {
+  display: none;
+}
+
+
+/* Стили для кнопки выхода */
+.logout-btn {
+  background-color: #0088cc;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #007ab8;
+}
+
+/* Класс для скрытия элементов */
+.hidden {
+  display: none;
+}
+
+/* CSS */
+
+/* Основной блок отзыва */
+.testimonial-card {
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Особенные стили для карточки */
+.special-card {
+  border: 2px solid #4a90e2;
+  transition: transform 0.3s ease;
+}
+
+.special-card:hover {
+  transform: scale(1.03);
+}
+
+/* Стили для изображения пользователя */
+.testimonial-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Особенные стили для изображения */
+.special-img {
+  border-color: #4a90e2;
+}
+
+/* Стили для цитаты */
+.testimonial-quote p {
+  font-style: italic;
+  color: #333;
+  margin: 15px 0;
+  line-height: 1.5;
+}
+
+/* Особенные стили для цитаты */
+.special-quote p {
+  position: relative;
+  padding-left: 20px;
+}
+
+.special-quote p::before {
+  content: "“";
+  font-size: 30px;
+  position: absolute;
+  left: 0;
+  top: -10px;
+  color: #4a90e2;
+}
+
+/* Стили для подписи автора */
+.testimonial-author {
+  font-weight: bold;
+  color: #555;
+}
+
+/* Особенные стили для подписи */
+.special-author {
+  font-size: 0.9em;
+  letter-spacing: 0.5px;
 }
