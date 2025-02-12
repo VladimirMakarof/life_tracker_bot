@@ -30,9 +30,14 @@ app.post("/save", (req, res) => {
 
     fs.writeFile(filePath, JSON.stringify(req.body, null, 2), (err) => {
         if (err) return res.status(500).json({ success: false, error: "Ошибка сохранения" });
-        res.json({ success: true, id: fileId });
+
+        // ✅ Генерируем зашифрованную ссылку
+        const generatedLink = `https://lite.lifetrackerbot.ru/data/${fileId}`;
+
+        res.json({ success: true, id: fileId, link: generatedLink });
     });
 });
+
 
 // 📌 2. Получение анкеты по ID
 app.get("/data/:id", (req, res) => {
