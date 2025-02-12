@@ -58,7 +58,11 @@
 
                     <label for="daily_limit">Лимит задач в день:</label>
                     <input type="number" id="daily_limit" name="daily_limit" min="1" max="10" required>
-
+                    
+                    <label>Ваши задачи:</label>
+                    <div id="taskContainer"></div>
+                    <button type="button" id="addTask">➕ Добавить задачу</button>
+                    
                     <div class="buttons">
                         <button type="button" onclick="saveToJson()">💾 Сохранить в JSON</button>
                         <input type="file" id="jsonFileInput" accept=".json">
@@ -66,6 +70,10 @@
                         <button type="button" onclick="sendToTelegram()">🚀 Отправить в Telegram</button>
                     </div>
                 </form>
+
+                <div id="dropZone" class="drop-zone">
+                    <p>Перетащите JSON-файл сюда или нажмите, чтобы выбрать файл</p>
+                </div>
 
                 <a id="downloadLink" style="display:none"></a>
             </div>
@@ -83,7 +91,7 @@
                 <a href="mailto:support@lifetracker.com">support@lifetracker.com</a>
             </div>
         </div>
-        <div class="footer-bottom">© 2024 LifeTracker</div>
+        <div class="footer-bottom">© 2025 LifeTracker</div>
     </footer>
     <script src="../js/script.js"></script>
 </body>

@@ -620,3 +620,25 @@ footer {
 	margin-top: 2rem;
 	border-top: 1px solid rgba(255,255,255,0.1);
 }
+.drop-zone {
+	border: 2px dashed var(--primary-color);
+	padding: 20px;
+	text-align: center;
+	margin-top: 20px;
+	cursor: pointer;
+	transition: background 0.3s;
+}
+.drop-zone.dragover {
+	background: rgba(42, 157, 143, 0.1);
+}
+.task-item {
+	display: block;
+	margin-top: 10px;
+	padding: 8px;
+	width: 100%;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+.buttons {
+	margin-top: 20px;
+}
