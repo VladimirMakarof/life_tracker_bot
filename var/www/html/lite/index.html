@@ -6,7 +6,7 @@
     <title>Lite Life Tracker Bot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="../img/favicon.svg" type="image/svg+xml" />
 </head>
 <body>
     <header class="gradient-bg">
@@ -40,35 +40,34 @@
     </header>
 
     <main>
-        <section id="about" class="section-wave">
+        <section id="survey" class="section-wave">
             <div class="section-inner">
-                <h2>О Life Tracker Bot</h2>
-                <p>Life Tracker Bot — ваш персональный помощник в управлении задачами, борьбе с прокрастинацией и улучшении продуктивности.</p>
-            </div>
-        </section>
+                <h2>Заполните анкету</h2>
+                <form id="survey-form">
+                    <label for="name">Ваше имя:</label>
+                    <input type="text" id="name" name="name" required>
 
-        <section id="features">
-            <div class="section-inner">
-                <h2>Ключевые возможности</h2>
-                <ul>
-                    <li><i class="fas fa-brain"></i> Анализ настроения</li>
-                    <li><i class="fas fa-tasks"></i> Умное планирование</li>
-                    <li><i class="fas fa-chart-line"></i> Отслеживание прогресса</li>
-                </ul>
-            </div>
-        </section>
+                    <label for="goal">Цель использования бота:</label>
+                    <input type="text" id="goal" name="goal" required>
 
-        <section id="testimonials" class="gradient-bg">
-            <div class="section-inner">
-                <h2>Отзывы пользователей</h2>
-                <p>Тысячи пользователей уже достигли своих целей с Life Tracker Bot!</p>
-            </div>
-        </section>
+                    <label for="reminders">Включить напоминания:</label>
+                    <select id="reminders" name="reminders">
+                        <option value="true">Да</option>
+                        <option value="false">Нет</option>
+                    </select>
 
-        <section id="faq">
-            <div class="section-inner">
-                <h2>Частые вопросы</h2>
-                <p>Как начать? Просто нажмите на кнопку "Начать" и подключите бота в Telegram!</p>
+                    <label for="daily_limit">Лимит задач в день:</label>
+                    <input type="number" id="daily_limit" name="daily_limit" min="1" max="10" required>
+
+                    <div class="buttons">
+                        <button type="button" onclick="saveToJson()">💾 Сохранить в JSON</button>
+                        <input type="file" id="jsonFileInput" accept=".json">
+                        <button type="button" onclick="loadJson()">📂 Загрузить JSON</button>
+                        <button type="button" onclick="sendToTelegram()">🚀 Отправить в Telegram</button>
+                    </div>
+                </form>
+
+                <a id="downloadLink" style="display:none"></a>
             </div>
         </section>
     </main>
@@ -86,6 +85,6 @@
         </div>
         <div class="footer-bottom">© 2024 LifeTracker</div>
     </footer>
-		<script src="../js/script.js"></script>
+    <script src="../js/script.js"></script>
 </body>
 </html>
