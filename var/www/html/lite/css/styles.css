@@ -515,7 +515,6 @@ footer {
 
 /* ========================== */
 
-
 /* Основные стили */
 :root {
 	--primary-color: #2A9D8F;
@@ -571,6 +570,24 @@ body {
 	font-size: 1rem;
 }
 
+/* Контейнер задач */
+#taskContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+.task-item {
+	display: block;
+	padding: 8px;
+	width: 100%;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	background: #fff;
+}
+
+/* Кнопки */
 .buttons {
 	display: flex;
 	flex-wrap: wrap;
@@ -591,6 +608,42 @@ button {
 
 button:hover {
 	background: var(--secondary-color);
+}
+
+/* Поле с зашифрованной ссылкой */
+#secureLinkContainer {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 15px;
+	background: #f8f9fa;
+	padding: 10px;
+	border-radius: 5px;
+	border: 1px solid #ccc;
+}
+
+#secureLink {
+	flex-grow: 1;
+	padding: 8px;
+	border: none;
+	background: transparent;
+	font-size: 1rem;
+	color: var(--text-color);
+	outline: none;
+}
+
+.copy-btn {
+	background: var(--accent-color);
+	padding: 10px 15px;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: bold;
+	border: none;
+	transition: background var(--transition-speed);
+}
+
+.copy-btn:hover {
+	background: #d4a556;
 }
 
 /* Футер */
@@ -619,26 +672,4 @@ footer {
 	padding: 2rem 0;
 	margin-top: 2rem;
 	border-top: 1px solid rgba(255,255,255,0.1);
-}
-.drop-zone {
-	border: 2px dashed var(--primary-color);
-	padding: 20px;
-	text-align: center;
-	margin-top: 20px;
-	cursor: pointer;
-	transition: background 0.3s;
-}
-.drop-zone.dragover {
-	background: rgba(42, 157, 143, 0.1);
-}
-.task-item {
-	display: block;
-	margin-top: 10px;
-	padding: 8px;
-	width: 100%;
-	border: 1px solid #ccc;
-	border-radius: 5px;
-}
-.buttons {
-	margin-top: 20px;
 }

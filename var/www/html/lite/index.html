@@ -64,18 +64,14 @@
                     <button type="button" id="addTask">➕ Добавить задачу</button>
                     
                     <div class="buttons">
-                        <button type="button" onclick="saveToJson()">💾 Сохранить в JSON</button>
-                        <input type="file" id="jsonFileInput" accept=".json">
-                        <button type="button" onclick="loadJson()">📂 Загрузить JSON</button>
-                        <button type="button" onclick="sendToTelegram()">🚀 Отправить в Telegram</button>
+                        <button type="button" onclick="generateSecureLink()">🔗 Скопировать ссылку</button>
+                    </div>
+                    
+                    <div class="generated-link">
+                        <input type="text" id="secureLink" readonly placeholder="Ссылка появится здесь">
+                        <button type="button" onclick="copyToClipboard()">📋 Копировать</button>
                     </div>
                 </form>
-
-                <div id="dropZone" class="drop-zone">
-                    <p>Перетащите JSON-файл сюда или нажмите, чтобы выбрать файл</p>
-                </div>
-
-                <a id="downloadLink" style="display:none"></a>
             </div>
         </section>
     </main>
