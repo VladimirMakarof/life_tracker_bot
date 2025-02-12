@@ -21,40 +21,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Функция генерации зашифрованной ссылки
 	window.generateSecureLink = async function () {
-			const tasks = Array.from(document.querySelectorAll('.task-item')).map(task => task.value);
-			const formData = {
-					name: document.getElementById("name").value,
-					goal: document.getElementById("goal").value,
-					reminders: document.getElementById("reminders").value === "true",
-					daily_limit: parseInt(document.getElementById("daily_limit").value),
-					tasks: tasks
-			};
+    const tasks = Array.from(document.querySelectorAll('.task-item')).map(task => task.value);
+    const formData = {
+        name: document.getElementById("name").value,
+        goal: document.getElementById("goal").value,
+        reminders: document.getElementById("reminders").value === "true",
+        daily_limit: parseInt(document.getElementById("daily_limit").value),
+        tasks: tasks
+    };
 
-			if (!formData.name || !formData.goal || !formData.daily_limit) {
-					alert("Пожалуйста, заполните все поля!");
-					return;
-			}
+    if (!formData.name || !formData.goal || !formData.daily_limit) {
+        alert("Пожалуйста, заполните все поля!");
+        return;
+    }
 
-			try {
-					const response = await fetch("/save", {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify(formData)
-					});
+    try {
+        const response = await fetch("/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        });
 
-					const result = await response.json();
+        const result = await response.json();
+        console.log("Ответ сервера:", result); // ✅ Проверяем ответ сервера
 
-					if (result.success) {
-							document.getElementById("secureLink").value = result.link;
-							alert("Ссылка сгенерирована! Вы можете её скопировать.");
-					} else {
-							alert("Ошибка при генерации ссылки.");
-					}
-			} catch (error) {
-					console.error("Ошибка:", error);
-					alert("Не удалось сохранить анкету.");
-			}
-	};
+        if (result.success && result.link) {
+            // ✅ Вставляем ссылку в input
+            document.getElementById("secureLink").value = result.link;
+            alert("Ссылка сгенерирована! Вы можете её скопировать.");
+        } else {
+            alert("Ошибка при генерации ссылки.");
+        }
+    } catch (error) {
+        console.error("Ошибка:", error);
+        alert("Не удалось сохранить анкету.");
+    }
+};
+
 
 	// Функция копирования ссылки в буфер обмена
 	window.copyToClipboard = function () {
