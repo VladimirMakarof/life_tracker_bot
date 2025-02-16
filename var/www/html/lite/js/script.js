@@ -66,4 +66,48 @@ document.addEventListener('DOMContentLoaded', () => {
 			document.execCommand("copy");
 			alert("Ссылка скопирована!");
 	};
+
+    const encryptedLinkInput = document.getElementById('encryptedLink');
+    const loadBtn = document.getElementById('loadBtn');
+    const editorField = document.getElementById('editorField');
+    const copyBtn = document.getElementById('copyBtn');
+  
+    // Обработчик для кнопки "Загрузить ссылку"
+    loadBtn.addEventListener('click', async () => {
+      const url = encryptedLinkInput.value.trim();
+      if (!url) {
+        alert('Пожалуйста, введите зашифрованную ссылку');
+        return;
+      }
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Ошибка загрузки данных: ${response.status} ${response.statusText}`);
+        }
+        // Если ожидается, что сервер вернет текст (например, JSON в виде строки)
+        const data = await response.text();
+        editorField.value = data;
+        alert('Данные успешно загружены!');
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+        alert('Не удалось загрузить данные: ' + error.message);
+      }
+    });
+  
+    // Обработчик для кнопки "Скопировать содержимое"
+    copyBtn.addEventListener('click', () => {
+      editorField.select();
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          alert('Содержимое скопировано в буфер обмена!');
+        } else {
+          alert('Не удалось скопировать содержимое.');
+        }
+      } catch (error) {
+        console.error('Ошибка при копировании содержимого:', error);
+        alert('Ошибка при копировании содержимого.');
+      }
+    });
+
 });
