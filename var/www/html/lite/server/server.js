@@ -44,9 +44,17 @@ app.post("/save", (req, res) => {
 
 
 app.post('/update', (req, res) => {
-    console.log('Получен POST-запрос на /update');
-    res.json({ success: true, message: 'Данные успешно обновлены' });
+    console.log('📩 Получен POST-запрос на /update с данными:', req.body);
+    
+    try {
+        res.json({ success: true, message: 'Данные успешно обновлены' });
+        console.log("✅ Успешный ответ отправлен клиенту");
+    } catch (error) {
+        console.error("❌ Ошибка при обработке запроса /update:", error);
+        res.status(500).json({ success: false, error: "Ошибка обновления" });
+    }
 });
+
 
 
 // 📌 2. Получение анкеты по ID
