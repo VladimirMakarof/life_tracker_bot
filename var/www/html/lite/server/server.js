@@ -29,13 +29,14 @@ app.post("/save", (req, res) => {
     const filePath = path.join(DATA_FOLDER, `${fileId}.json`);
 
     fs.writeFile(filePath, JSON.stringify(req.body, null, 2), (err) => {
-        if (err) return res.status(500).json({ success: false, error: "Ошибка сохранения" });
-
-        // ✅ Генерируем зашифрованную ссылку
+        if (err) {
+            console.error("Ошибка при сохранении файла:", err);
+            return res.status(500).json({ success: false, error: "Ошибка сохранения" });
+        }
         const generatedLink = `https://lite.lifetrackerbot.ru/data/${fileId}`;
-
         res.json({ success: true, id: fileId, link: generatedLink });
     });
+    
 });
 
 
