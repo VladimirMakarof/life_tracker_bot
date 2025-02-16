@@ -1,142 +1,184 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lite Life Tracker Bot</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="icon" href="../img/favicon.svg" type="image/svg+xml" />
-</head>
-<body>
-    <header class="gradient-bg">
-        <nav>
-            <div class="logo">
-                <img src="../img/bot-icon.png" alt="Логотип бота" class="logo-img">
-                LifeTracker Lite
-            </div>
-            <button class="burger-menu" aria-label="Открыть меню">&#9776;</button>
-            <ul class="nav-links">
-                <li><a href="#about">О боте</a></li>
-                <li><a href="#features">Возможности</a></li>
-                <li><a href="#testimonials">Отзывы</a></li>
-                <li><a href="#faq">FAQ</a></li>
-                <li>
-                    <a href="https://t.me/life_tracker_app_bot" class="telegram-btn" target="_blank">
-                        <i class="fab fa-telegram"></i> Начать
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <div class="hero">
-            <div class="hero-content">
-                <h1>Лёгкая версия Life Tracker Bot</h1>
-                <p class="hero-subtitle">Быстрый доступ к возможностям бота без лишних элементов</p>
-                <a href="https://t.me/life_tracker_app_bot" class="cta-button pulse" target="_blank">
-                    <i class="fab fa-telegram"></i> Начать бесплатно
-                </a>
-            </div>
-        </div>
-    </header>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Lite Life Tracker Bot</title>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+		/>
+		<link rel="stylesheet" href="../css/styles.css" />
+		<link rel="icon" href="../img/favicon.svg" type="image/svg+xml" />
+	</head>
+	<body>
+		<header class="gradient-bg">
+			<nav>
+				<div class="logo">
+					<img src="../img/bot-icon.png" alt="Логотип бота" class="logo-img" />
+					LifeTracker Lite
+				</div>
+				<button class="burger-menu" aria-label="Открыть меню">&#9776;</button>
+				<ul class="nav-links">
+					<li><a href="#about">О боте</a></li>
+					<li><a href="#features">Возможности</a></li>
+					<li><a href="#testimonials">Отзывы</a></li>
+					<li><a href="#faq">FAQ</a></li>
+					<li>
+						<a
+							href="https://t.me/life_tracker_app_bot"
+							class="telegram-btn"
+							target="_blank"
+						>
+							<i class="fab fa-telegram"></i> Начать
+						</a>
+					</li>
+				</ul>
+			</nav>
+			<div class="hero">
+				<div class="hero-content">
+					<h1>Лёгкая версия Life Tracker Bot</h1>
+					<p class="hero-subtitle">
+						Быстрый доступ к возможностям бота без лишних элементов
+					</p>
+					<a
+						href="https://t.me/life_tracker_app_bot"
+						class="cta-button pulse"
+						target="_blank"
+					>
+						<i class="fab fa-telegram"></i> Начать бесплатно
+					</a>
+				</div>
+			</div>
+		</header>
 
-    <main>
+		<main>
+			<div class="form-container">
+				<!-- Добавляем переключатель табов -->
+				<div class="tabs-container" >
+					<button id="createTab" class="tab-btn active">
+						Создать настройки
+					</button>
+					<button id="editTab" class="tab-btn">Редактировать настройки</button>
+				</div>
 
-        <div class="form-container"></div>
-       <!-- Добавляем переключатель табов -->
-<div class="tabs-container" style="max-width:600px; margin: 2rem auto;">
-    <button id="createTab" class="tab-btn active">Создать настройки</button>
-    <button id="editTab" class="tab-btn">Редактировать настройки</button>
-  </div>
-  
-  <!-- Блок для создания настроек (существующая форма) -->
-  <section id="createSettings" class="tab-content active">
-    <h2>Заполните анкету</h2>
-    <form id="survey-form">
-      <label for="name">Ваше имя:</label>
-      <input type="text" id="name" name="name" required>
-  
-      <label for="goal">Цель использования бота:</label>
-      <input type="text" id="goal" name="goal" required>
-  
-      <label for="reminders">Включить напоминания:</label>
-      <select id="reminders" name="reminders">
-        <option value="true">Да</option>
-        <option value="false">Нет</option>
-      </select>
-  
-      <label for="daily_limit">Лимит задач в день:</label>
-      <input type="number" id="daily_limit" name="daily_limit" min="1" max="10" required>
-                      
-      <label>Ваши задачи:</label>
-      <div id="taskContainer"></div>
-      <button type="button" id="addTask">➕ Добавить задачу</button>
-                      
-      <div class="buttons">
-        <button type="button" onclick="generateSecureLink()">🔗 Скопировать ссылку</button>
-      </div>
-                      
-      <div class="generated-link">
-        <input type="text" id="secureLink" readonly placeholder="Ссылка появится здесь">
-        <button type="button" onclick="copyToClipboard()">📋 Копировать</button>
-      </div>
-    </form>
-  </section>
-  
-  <!-- Блок для редактирования настроек -->
-  <section id="editSettings" class="tab-content">
-    <h2>Редактировать настройки</h2>
-    <form id="edit-form">
-      <!-- Ввод ссылки для загрузки данных -->
-      <label for="editLink">Введите ссылку, полученную ранее:</label>
-      <input type="text" id="editLink" name="editLink" placeholder="https://example.com/your-config.json" required>
-      <button type="button" id="loadSettings">Загрузить настройки</button>
-      
-      <!-- Блок с формой для редактирования (скрыт до загрузки) -->
-      <div id="editFormFields" class="hidden">
-        <label for="editName">Ваше имя:</label>
-        <input type="text" id="editName" name="name" required>
-  
-        <label for="editGoal">Цель использования бота:</label>
-        <input type="text" id="editGoal" name="goal" required>
-  
-        <label for="editReminders">Включить напоминания:</label>
-        <select id="editReminders" name="reminders">
-          <option value="true">Да</option>
-          <option value="false">Нет</option>
-        </select>
-  
-        <label for="editDailyLimit">Лимит задач в день:</label>
-        <input type="number" id="editDailyLimit" name="daily_limit" min="1" max="10" required>
-  
-        <label>Ваши задачи:</label>
-        <div id="editTaskContainer"></div>
-        <button type="button" id="addEditTask">➕ Добавить задачу</button>
-        
-        <div class="buttons">
-          <button type="button" id="updateSettings">Получить новую ссылку</button>
-        </div>
-      </div>
-    </form>
-  </section>
-  
-</div>
-          
-          
-    </main>
+				<!-- Блок для создания настроек (существующая форма) -->
+				<section id="createSettings" class="tab-content active">
+					<h2>Заполните анкету</h2>
+					<form id="survey-form">
+						<label for="name">Ваше имя:</label>
+						<input type="text" id="name" name="name" required />
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>LifeTracker</h4>
-                <p>Ваш цифровой помощник</p>
-            </div>
-            <div class="footer-section">
-                <h4>Контакты</h4>
-                <a href="mailto:support@lifetracker.com">support@lifetracker.com</a>
-            </div>
-        </div>
-        <div class="footer-bottom">© 2025 LifeTracker</div>
-    </footer>
-    <script src="../js/script.js"></script>
-</body>
+						<label for="goal">Цель использования бота:</label>
+						<input type="text" id="goal" name="goal" required />
+
+						<label for="reminders">Включить напоминания:</label>
+						<select id="reminders" name="reminders">
+							<option value="true">Да</option>
+							<option value="false">Нет</option>
+						</select>
+
+						<label for="daily_limit">Лимит задач в день:</label>
+						<input
+							type="number"
+							id="daily_limit"
+							name="daily_limit"
+							min="1"
+							max="10"
+							required
+						/>
+
+						<label>Ваши задачи:</label>
+						<div id="taskContainer"></div>
+						<button type="button" id="addTask">➕ Добавить задачу</button>
+
+						<div class="buttons">
+							<button type="button" onclick="generateSecureLink()">
+								🔗 Скопировать ссылку
+							</button>
+						</div>
+
+						<div class="generated-link">
+							<input
+								type="text"
+								id="secureLink"
+								readonly
+								placeholder="Ссылка появится здесь"
+							/>
+							<button type="button" onclick="copyToClipboard()">
+								📋 Копировать
+							</button>
+						</div>
+					</form>
+				</section>
+
+				<!-- Блок для редактирования настроек -->
+				<section id="editSettings" class="tab-content">
+					<h2>Редактировать настройки</h2>
+					<form id="edit-form">
+						<!-- Ввод ссылки для загрузки данных -->
+						<label for="editLink">Введите ссылку, полученную ранее:</label>
+						<input
+							type="text"
+							id="editLink"
+							name="editLink"
+							placeholder="https://example.com/your-config.json"
+							required
+						/>
+						<button type="button" id="loadSettings">Загрузить настройки</button>
+
+						<!-- Блок с формой для редактирования (скрыт до загрузки) -->
+						<div id="editFormFields" class="hidden">
+							<label for="editName">Ваше имя:</label>
+							<input type="text" id="editName" name="name" required />
+
+							<label for="editGoal">Цель использования бота:</label>
+							<input type="text" id="editGoal" name="goal" required />
+
+							<label for="editReminders">Включить напоминания:</label>
+							<select id="editReminders" name="reminders">
+								<option value="true">Да</option>
+								<option value="false">Нет</option>
+							</select>
+
+							<label for="editDailyLimit">Лимит задач в день:</label>
+							<input
+								type="number"
+								id="editDailyLimit"
+								name="daily_limit"
+								min="1"
+								max="10"
+								required
+							/>
+
+							<label>Ваши задачи:</label>
+							<div id="editTaskContainer"></div>
+							<button type="button" id="addEditTask">➕ Добавить задачу</button>
+
+							<div class="buttons">
+								<button type="button" id="updateSettings">
+									Получить новую ссылку
+								</button>
+							</div>
+						</div>
+					</form>
+				</section>
+			</div>
+		</main>
+
+		<footer>
+			<div class="footer-content">
+				<div class="footer-section">
+					<h4>LifeTracker</h4>
+					<p>Ваш цифровой помощник</p>
+				</div>
+				<div class="footer-section">
+					<h4>Контакты</h4>
+					<a href="mailto:support@lifetracker.com">support@lifetracker.com</a>
+				</div>
+			</div>
+			<div class="footer-bottom">© 2025 LifeTracker</div>
+		</footer>
+		<script src="../js/script.js"></script>
+	</body>
 </html>
