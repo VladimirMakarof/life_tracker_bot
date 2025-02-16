@@ -1,7 +1,7 @@
 const { Telegraf, session } = require("telegraf"); 
 const axios = require("axios");
 require("dotenv").config();
-console.log("Токен:", process.env.TELEGRAM_BOT_TOKEN);
+console.log("🤖 Бот запущен...");
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
 bot.use(session()); // Включаем поддержку сессий
