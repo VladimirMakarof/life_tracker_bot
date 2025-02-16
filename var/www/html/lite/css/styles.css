@@ -674,7 +674,6 @@ footer {
 	border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-
 /* Новый контейнер для форм */
 .form-container {
   max-width: 600px;
@@ -686,7 +685,7 @@ footer {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Стили для переключателя табов (если они ещё не добавлены) */
+/* Стили для переключателя табов */
 .tabs-container {
   display: flex;
   justify-content: center;
@@ -719,6 +718,43 @@ footer {
 
 .tab-content.active {
   display: block;
+}
+
+/* Универсальные стили для форм (как создания, так и редактирования) */
+.survey-form label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.survey-form input,
+.survey-form select {
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.survey-form .buttons {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.survey-form button {
+  padding: 10px 15px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background var(--transition-speed);
+}
+
+.survey-form button:hover {
+  background: var(--secondary-color);
 }
 
 /* Адаптивность для меньших экранов */
