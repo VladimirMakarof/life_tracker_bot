@@ -34,9 +34,10 @@ bot.on("text", async (ctx) => {
             `📌 Лимит задач в день: ${settings.daily_limit}\n` +
             `📋 Задачи:\n${settings.tasks.map((t, i) => `${i + 1}. ${t}`).join("\n")}`
         );
-    } catch (error) {
-        ctx.reply("❌ Ошибка загрузки настроек. Проверьте ссылку и попробуйте снова.");
-    }
+			} catch (error) {
+				console.error("Ошибка при загрузке настроек:", error.message);
+				ctx.reply(`❌ Ошибка загрузки настроек: ${error.message}`);
+		}
 });
 
 // Добавляем команду, чтобы проверить загруженные настройки
