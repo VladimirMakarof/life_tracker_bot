@@ -39,6 +39,11 @@ app.post("/save", (req, res) => {
     
 });
 
+app.post('/update', (req, res) => {
+    console.log('Получен POST-запрос на /update');
+    res.json({ success: true, message: 'Данные успешно обновлены' });
+});
+
 
 // 📌 2. Получение анкеты по ID
 app.get("/data/:id", (req, res) => {
