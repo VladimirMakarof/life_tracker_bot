@@ -20,24 +20,28 @@ app.use(cors());
 app.post("/save", (req, res) => {
     const { name, goal, reminders, daily_limit, tasks } = req.body;
 
-    // Проверяем обязательные поля
     if (!name || !goal || typeof reminders !== "boolean" || !daily_limit || !Array.isArray(tasks)) {
         return res.status(400).json({ success: false, error: "Некорректные данные" });
     }
 
-    const fileId = uuidv4().slice(0, 8); // Генерируем короткий ID
+    if (!fs.existsSync(DATA_FOLDER)) {
+        console.log("⚠️ Папка 'data' не найдена, создаем...");
+        fs.mkdirSync(DATA_FOLDER, { recursive: true });
+    }
+
+    const fileId = uuidv4().slice(0, 8);
     const filePath = path.join(DATA_FOLDER, `${fileId}.json`);
 
     fs.writeFile(filePath, JSON.stringify(req.body, null, 2), (err) => {
         if (err) {
-            console.error("Ошибка при сохранении файла:", err);
+            console.error("🔥 Ошибка при сохранении файла:", err);
             return res.status(500).json({ success: false, error: "Ошибка сохранения" });
         }
-        const generatedLink = `https://lite.lifetrackerbot.ru/data/${fileId}`;
-        res.json({ success: true, id: fileId, link: generatedLink });
+        console.log(`✅ Файл сохранен: ${filePath}`);
+        res.json({ success: true, id: fileId, link: `https://lite.lifetrackerbot.ru/data/${fileId}` });
     });
-    
 });
+
 
 app.post('/update', (req, res) => {
     console.log('Получен POST-запрос на /update');
