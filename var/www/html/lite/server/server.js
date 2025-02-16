@@ -10,7 +10,7 @@ const DATA_FOLDER = path.join(__dirname, "data");
 
 // Создаём папку для хранения анкет, если её нет
 if (!fs.existsSync(DATA_FOLDER)) {
-    fs.mkdirSync(DATA_FOLDER);
+    fs.mkdirSync(DATA_FOLDER, { recursive: true });
 }
 
 app.use(express.json());
