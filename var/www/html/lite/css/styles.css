@@ -765,6 +765,7 @@ footer {
 	width: 100%;
 	outline: none;
 	transition: all 0.3s ease;
+	margin-bottom: 15px;
 }
 
 #edit-form input:focus {
