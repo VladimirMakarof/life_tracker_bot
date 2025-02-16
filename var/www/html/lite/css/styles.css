@@ -673,3 +673,44 @@ footer {
 	margin-top: 2rem;
 	border-top: 1px solid rgba(255,255,255,0.1);
 }
+
+
+/* Стили для переключателя табов */
+.tabs-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background var(--transition-speed);
+}
+
+.tab-btn:hover {
+  background: var(--secondary-color);
+}
+
+.tab-btn.active {
+  background: var(--accent-color);
+}
+
+/* Скрытие неактивных блоков */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Утилитный класс для скрытия элементов */
+.hidden {
+  display: none;
+}

@@ -40,42 +40,83 @@
     </header>
 
     <main>
-        <section id="survey" class="section-wave">
-            <div class="section-inner">
-                <h2>Заполните анкету</h2>
-                <form id="survey-form">
-                    <label for="name">Ваше имя:</label>
-                    <input type="text" id="name" name="name" required>
-
-                    <label for="goal">Цель использования бота:</label>
-                    <input type="text" id="goal" name="goal" required>
-
-                    <label for="reminders">Включить напоминания:</label>
-                    <select id="reminders" name="reminders">
-                        <option value="true">Да</option>
-                        <option value="false">Нет</option>
-                    </select>
-
-                    <label for="daily_limit">Лимит задач в день:</label>
-                    <input type="number" id="daily_limit" name="daily_limit" min="1" max="10" required>
-                    
-                    <label>Ваши задачи:</label>
-                    <div id="taskContainer"></div>
-                    <button type="button" id="addTask">➕ Добавить задачу</button>
-                    
-                    <div class="buttons">
-                        <button type="button" onclick="generateSecureLink()">🔗 Скопировать ссылку</button>
-                    </div>
-                    
-                    <div class="generated-link">
-                        <input type="text" id="secureLink" readonly placeholder="Ссылка появится здесь">
-                        <button type="button" onclick="copyToClipboard()">📋 Копировать</button>
-                    </div>
-                </form>
-            </div>
-
-            
-        </section>
+       <!-- Добавляем переключатель табов -->
+<div class="tabs-container" style="max-width:600px; margin: 2rem auto;">
+    <button id="createTab" class="tab-btn active">Создать настройки</button>
+    <button id="editTab" class="tab-btn">Редактировать настройки</button>
+  </div>
+  
+  <!-- Блок для создания настроек (существующая форма) -->
+  <section id="createSettings" class="tab-content active">
+    <h2>Заполните анкету</h2>
+    <form id="survey-form">
+      <label for="name">Ваше имя:</label>
+      <input type="text" id="name" name="name" required>
+  
+      <label for="goal">Цель использования бота:</label>
+      <input type="text" id="goal" name="goal" required>
+  
+      <label for="reminders">Включить напоминания:</label>
+      <select id="reminders" name="reminders">
+        <option value="true">Да</option>
+        <option value="false">Нет</option>
+      </select>
+  
+      <label for="daily_limit">Лимит задач в день:</label>
+      <input type="number" id="daily_limit" name="daily_limit" min="1" max="10" required>
+                      
+      <label>Ваши задачи:</label>
+      <div id="taskContainer"></div>
+      <button type="button" id="addTask">➕ Добавить задачу</button>
+                      
+      <div class="buttons">
+        <button type="button" onclick="generateSecureLink()">🔗 Скопировать ссылку</button>
+      </div>
+                      
+      <div class="generated-link">
+        <input type="text" id="secureLink" readonly placeholder="Ссылка появится здесь">
+        <button type="button" onclick="copyToClipboard()">📋 Копировать</button>
+      </div>
+    </form>
+  </section>
+  
+  <!-- Блок для редактирования настроек -->
+  <section id="editSettings" class="tab-content">
+    <h2>Редактировать настройки</h2>
+    <form id="edit-form">
+      <!-- Ввод ссылки для загрузки данных -->
+      <label for="editLink">Введите ссылку, полученную ранее:</label>
+      <input type="text" id="editLink" name="editLink" placeholder="https://example.com/your-config.json" required>
+      <button type="button" id="loadSettings">Загрузить настройки</button>
+      
+      <!-- Блок с формой для редактирования (скрыт до загрузки) -->
+      <div id="editFormFields" class="hidden">
+        <label for="editName">Ваше имя:</label>
+        <input type="text" id="editName" name="name" required>
+  
+        <label for="editGoal">Цель использования бота:</label>
+        <input type="text" id="editGoal" name="goal" required>
+  
+        <label for="editReminders">Включить напоминания:</label>
+        <select id="editReminders" name="reminders">
+          <option value="true">Да</option>
+          <option value="false">Нет</option>
+        </select>
+  
+        <label for="editDailyLimit">Лимит задач в день:</label>
+        <input type="number" id="editDailyLimit" name="daily_limit" min="1" max="10" required>
+  
+        <label>Ваши задачи:</label>
+        <div id="editTaskContainer"></div>
+        <button type="button" id="addEditTask">➕ Добавить задачу</button>
+        
+        <div class="buttons">
+          <button type="button" id="updateSettings">Получить новую ссылку</button>
+        </div>
+      </div>
+    </form>
+  </section>
+  
 
           
           
