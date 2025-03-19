@@ -182,6 +182,9 @@
 						</script>
 						<script>
 							function onTelegramAuth(user) {
+
+								console.log("onTelegramAuth вызван", user);
+
 								fetch('/telegram-auth', {
 									method: 'POST',
 									headers: { 'Content-Type': 'application/json' },
