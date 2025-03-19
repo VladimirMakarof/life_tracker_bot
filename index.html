@@ -181,7 +181,7 @@
 										data-request-access="write">
 						</script>
 						<script>
-							function onTelegramAuth(user) {
+							window.onTelegramAuth = function(user) {
 
 								console.log("onTelegramAuth вызван", user);
 
