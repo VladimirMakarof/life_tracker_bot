@@ -1,11 +1,13 @@
+require("dotenv").config(); // Подключаем dotenv
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
-
+const jwt = require("jsonwebtoken");
 const app = express();
 const PORT = 5000;
+const JWT_SECRET = process.env.JWT_SECRET;
 const DATA_FOLDER = path.join(__dirname, "data");
 
 // Создаём папку для хранения анкет, если её нет
@@ -41,6 +43,34 @@ app.post("/save", (req, res) => {
         res.json({ success: true, id: fileId, link: `https://lite.lifetrackerbot.ru/data/${fileId}` });
     });
 });
+
+app.post('/telegram-auth', (req, res) => {
+    const telegramUser = req.body;
+    console.log("Пользователь авторизовался через Telegram:", telegramUser);
+
+    // Проверка полученных данных
+    if (!telegramUser || !telegramUser.id) {
+        return res.json({ success: false, error: "Неверные данные" });
+    }
+
+    // Здесь можно добавить логику проверки/создания пользователя в БД
+
+    // Генерация JWT-токена с использованием вашего JWT_SECRET.
+    // В полезную нагрузку можно добавить нужные поля (например, chatId, username, first_name).
+    const token = jwt.sign(
+        {
+            chatId: telegramUser.id,
+            username: telegramUser.username,
+            first_name: telegramUser.first_name
+        },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+
+    // Отправляем ответ клиенту с полем success и сгенерированным токеном.
+    res.json({ success: true, token });
+});
+
 
 
 app.post('/update', (req, res) => {
