@@ -107,6 +107,9 @@ app.delete("/data/:id", (req, res) => {
     });
 });
 
+const listEndpoints = require('express-list-endpoints');
+console.log(listEndpoints(app));
+
 // 📌 4. Запуск сервера
 app.listen(PORT, "0.0.0.0", () => console.log(`✅ Сервер запущен на http://0.0.0.0:${PORT}`));
 
