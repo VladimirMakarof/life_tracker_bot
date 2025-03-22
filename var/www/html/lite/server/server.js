@@ -91,6 +91,8 @@ app.post('/update', (req, res) => {
     }
 });
 
+const listEndpoints = require('express-list-endpoints');
+console.log("▶️ Registered routes:", listEndpoints(app));
 
 
 // 📌 2. Получение анкеты по ID
