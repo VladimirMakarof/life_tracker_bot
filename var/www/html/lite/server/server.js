@@ -1,5 +1,9 @@
 // require("dotenv").config(); // Подключаем dotenv
+const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
+console.log("Загруженные переменные окружения:", process.env);
+console.log("BOT_TOKEN =", process.env.BOT_TOKEN);
+
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
