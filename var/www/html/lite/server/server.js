@@ -1,4 +1,5 @@
-require("dotenv").config(); // Подключаем dotenv
+// require("dotenv").config(); // Подключаем dotenv
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
