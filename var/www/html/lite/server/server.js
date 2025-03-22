@@ -1,6 +1,7 @@
 // require("dotenv").config(); // Подключаем dotenv
 const path = require("path");
-require("dotenv").config({ path: path.join(__dirname, "../.env") });
+require("dotenv").config({ path: "/var/www/lifetrackerb_usr/data/www/lifetrackerbot.ru/.env" });
+
 console.log("Загруженные переменные окружения:", process.env);
 console.log("BOT_TOKEN =", process.env.BOT_TOKEN);
 
