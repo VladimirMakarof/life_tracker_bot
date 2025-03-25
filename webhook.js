@@ -1,13 +1,8 @@
 // Загружаем переменные окружения
 require('dotenv').config();
-
-const cors = require('cors');
-app.use(cors({
-  origin: 'https://lifetrackerbot.ru',
-  credentials: true
-}));
-
 const express = require('express');
+const cors = require('cors');
+
 const { exec } = require('child_process');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -17,6 +12,8 @@ const Database = require('better-sqlite3');
 const TelegramBot = require('node-telegram-bot-api');
 const schedule = require('node-schedule');
 const path = require('path');
+
+
 
 // Логгер 123444
 const logger = {
@@ -32,6 +29,11 @@ const dbPath = process.env.DB_PATH || 'data.db';
 const SECRET = process.env.SECRET_TOKEN;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key';
+
+app.use(cors({
+  origin: 'https://lifetrackerbot.ru',
+  credentials: true
+}));
 
 if (!SECRET || !BOT_TOKEN || !url) {
   console.error('❌ ОШИБКА: Не все переменные окружения установлены.');
@@ -331,10 +333,6 @@ function authenticateToken(req, res, next) {
     return res.status(403).json({ success: false, error: 'Неверный или просроченный токен' });
   }
 }
-
-
-
-// const path = require('path');
 
 // Добавьте в секцию обработки маршрутов
 app.get('/dashboard', authenticateToken, (req, res) => {
