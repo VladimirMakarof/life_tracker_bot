@@ -15,11 +15,7 @@ const path = require('path');
 
 
 
-<<<<<<< HEAD
-// Логгер 123444 
-=======
-// Логгер 123444
->>>>>>> d46be6c (new)
+
 const logger = {
   info: (...args) => console.log('[INFO]', ...args),
   error: (...args) => console.error('[ERROR]', ...args)
@@ -338,11 +334,6 @@ function authenticateToken(req, res, next) {
   }
 }
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> d46be6c (new)
 // Добавьте в секцию обработки маршрутов
 app.get('/dashboard', authenticateToken, (req, res) => {
   try {
