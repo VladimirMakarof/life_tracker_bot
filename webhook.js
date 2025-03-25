@@ -334,8 +334,16 @@ function authenticateToken(req, res, next) {
 
 
 
-app.get('/dashboard', (req, res) => {
-  return res.sendFile(path.join(__dirname, 'pages', 'dashboard.html'));
+const path = require('path');
+
+// Добавьте в секцию обработки маршрутов
+app.get('/dashboard', authenticateToken, (req, res) => {
+  try {
+    res.sendFile(path.join(__dirname, 'pages/dashboard.html'));
+  } catch (error) {
+    console.error('Ошибка при отправке dashboard:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 
