@@ -334,7 +334,7 @@ function authenticateToken(req, res, next) {
 
 
 
-const path = require('path');
+// const path = require('path');
 
 // Добавьте в секцию обработки маршрутов
 app.get('/dashboard', authenticateToken, (req, res) => {
