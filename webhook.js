@@ -1,6 +1,12 @@
 // Загружаем переменные окружения
 require('dotenv').config();
 
+const cors = require('cors');
+app.use(cors({
+  origin: 'https://lifetrackerbot.ru',
+  credentials: true
+}));
+
 const express = require('express');
 const { exec } = require('child_process');
 const crypto = require('crypto');
@@ -136,13 +142,12 @@ db.prepare(`
 const bot = new TelegramBot(BOT_TOKEN);
 // bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET });
 
-bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { secret_token: SECRET })
-  .then((resp) => {
-    console.log('✅ Вебхук для Telegram установлен успешно', resp.data);
-  })
-  .catch((err) => {
-    console.error('❌ Ошибка при установке вебхука для Telegram:', err);
-  });
+bot.setWebHook(`${url}/bot${BOT_TOKEN}`, { 
+  secret_token: SECRET,
+  certificate: process.env.SSL_CERT // Если используете HTTPS
+})
+.then(() => console.log('Webhook установлен'))
+.catch(console.error);
 
 
 // Подключение middleware
@@ -215,38 +220,47 @@ app.post(`/bot${BOT_TOKEN}`, (req, res) => {
 
 app.post('/telegram-auth', (req, res) => {
   const telegramUser = req.body;
-  console.log("Пользователь авторизовался через Telegram:", telegramUser);
-
-  if (!telegramUser || !telegramUser.id) {
-    return res.json({ success: false, error: "Неверные данные" });
+  
+  // Валидация данных
+  if (!telegramUser?.id) {
+    return res.status(400).json({ success: false, error: "Invalid user data" });
   }
 
   const chatId = String(telegramUser.id);
-  let user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
+  
+  try {
+    // Обновляем или создаем пользователя
+    db.prepare(`
+      INSERT INTO users (chat_id, username, name) 
+      VALUES (?, ?, ?)
+      ON CONFLICT(chat_id) DO UPDATE SET 
+        username = excluded.username,
+        name = excluded.name
+    `).run(
+      chatId,
+      telegramUser.username || '',
+      telegramUser.first_name || ''
+    );
 
-  if (!user) {
-    // Создаём запись
-    try {
-      db.prepare(`
-        INSERT INTO users (chat_id, username, name) 
-        VALUES (?, ?, ?)
-      `).run(
-        chatId, 
-        telegramUser.username || '', 
-        telegramUser.first_name || ''
-      );
-      user = db.prepare('SELECT * FROM users WHERE chat_id = ?').get(chatId);
-    } catch (err) {
-      console.error("Ошибка при создании пользователя:", err);
-      return res.json({ success: false, error: "Ошибка при создании пользователя" });
-    }
+    // Генерируем JWT
+    const token = jwt.sign(
+      { 
+        chatId: chatId,
+        username: telegramUser.username 
+      }, 
+      SECRET_KEY, 
+      { expiresIn: '7d' }
+    );
+
+    res.json({ 
+      success: true, 
+      token // Отправляем токен в ответе
+    });
+
+  } catch (error) {
+    console.error("Ошибка при обработке авторизации:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
-
-  // Генерируем JWT
-  const token = jwt.sign({ chatId }, SECRET_KEY, { expiresIn: '7d' });
-
-  // Возвращаем токен в JSON (НЕ ставим cookie!)
-  res.json({ success: true, token });
 });
 
 
@@ -301,20 +315,20 @@ app.post('/verify-deep-link', (req, res) => {
 
 // Middleware для проверки JWT
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers.authorization; // "Bearer xxx"
-  if (!authHeader) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) {
     return res.status(401).json({ success: false, error: 'Токен не найден' });
   }
-  const token = authHeader.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ success: false, error: 'Неверный заголовок Authorization' });
-  }
+
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded; // { chatId: ... }
+    req.user = decoded;
     next();
   } catch (err) {
-    return res.status(403).json({ success: false, error: 'Токен недействителен или просрочен' });
+    console.error('Ошибка верификации токена:', err);
+    return res.status(403).json({ success: false, error: 'Неверный или просроченный токен' });
   }
 }
 

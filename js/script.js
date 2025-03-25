@@ -56,53 +56,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Вызываем обновление UI при загрузке страницы
   updateAuthUI();
   window.onTelegramAuth = function(user) {
-    console.log("[DEBUG] onTelegramAuth вызван. user =", user);
-
+    console.log("onTelegramAuth вызван", user);
     fetch('/telegram-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // Передаём user, а не userFromTelegram
       body: JSON.stringify(user)
     })
-    .then(response => {
-      console.log("[DEBUG] Получен ответ (Response) от /telegram-auth:", response);
-      return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-      console.log("[DEBUG] JSON-данные от /telegram-auth:", data);
-
-      if (data.success) {
-        console.log("[DEBUG] Авторизация успешна. Сохраняем токен:", data.token);
-
-        // Сохраняем токен
-        localStorage.setItem('auth_token', data.token);
-
-        // Ставим флаг, что пользователь авторизован
-        localStorage.setItem('isAuthenticated', 'true');
-
-        // Сохраняем имя пользователя (при желании)
-        localStorage.setItem('userName', user.first_name);
-
-        console.log("[DEBUG] Вызываем updateAuthUI()...");
-        updateAuthUI();
-
-        console.log("[DEBUG] Перенаправляем пользователя на /dashboard...");
-        window.location.href = '/dashboard';
-
+      if (data.success && data.token) { // Добавлена проверка на наличие токена
+        localStorage.setItem('auth_token', data.token); // Сохраняем токен
+        window.location.href = '/dashboard'; // Перенаправляем
       } else {
-        console.log("[DEBUG] Ошибка авторизации:", data.error);
-
-        // Показываем сообщение об ошибке
-        document.getElementById('loginMessage').textContent =
+        document.getElementById('loginMessage').textContent = 
           "Ошибка авторизации: " + (data.error || "неизвестная ошибка");
       }
     })
     .catch(error => {
-      console.error("[DEBUG] Ошибка при запросе /telegram-auth:", error);
-      document.getElementById('loginMessage').textContent =
-        "Ошибка сети или сервера.";
+      console.error("Ошибка при авторизации:", error);
+      document.getElementById('loginMessage').textContent = "Ошибка сети или сервера.";
     });
-  };
+  }
 	
 	
 
